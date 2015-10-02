@@ -91,7 +91,7 @@ public class CacheSqliteManager implements CacheDataSource {
   }
 
   @Override public void delete(String key) {
-    throw new IllegalStateException("delete() is not implemented");
+    db.delete(CacheTableMeta.TABLE, CacheTableMeta.COLUMN_KEY + " = ?", key);
   }
 
   @Override public <T extends CachingStrategyObject> void executeValidation(StoreObject storeObject,
