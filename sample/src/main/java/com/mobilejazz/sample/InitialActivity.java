@@ -1,10 +1,8 @@
 package com.mobilejazz.sample;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import com.mobilejazz.cacheio.CacheDataSource;
 import com.mobilejazz.cacheio.CacheIO;
 import com.mobilejazz.cacheio.manager.entity.CacheEntry;
@@ -58,5 +56,16 @@ public class InitialActivity extends AppCompatActivity {
     for (User user : resultQueryListUsers) {
       Log.d(TAG, user.toString());
     }
+
+    User userThree = new User();
+    userThree.setId(3);
+    userThree.setName("Aldo Borrero");
+
+    CacheEntry cacheEntryUserThree = CacheEntry.create("user.key.three", User.class, userThree);
+    cacheDataSource.persist(cacheEntryUserThree);
+    cacheDataSource.delete("user.key.three");
+
+    CacheEntry emptyUserThreeEntry = cacheDataSource.obtain("user.key.three");
+    Log.d(TAG, "Cache is emptied for User three: " + String.valueOf(emptyUserThreeEntry == null));
   }
 }
