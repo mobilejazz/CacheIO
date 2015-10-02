@@ -29,7 +29,7 @@ public class CacheSqliteManager implements CacheDataSource {
 + CacheTableMeta.TABLE + " WHERE " + CacheTableMeta.COLUMN_KEY + " = ?",
         key);
 
-    if (result.getCount() > 1) {
+    if (result.getCount() >= 1) {
       List values = new ArrayList(result.getCount());
       String keyDb = null;
       Class<?> type = null;

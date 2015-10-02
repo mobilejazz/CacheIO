@@ -51,7 +51,7 @@ Add CacheIO dependency to your build.gradle file
 
 ```xml
 dependencies {
-  compile 'com.github.mobilejazz:cacheio:0.2.1'
+  compile 'com.github.mobilejazz:cacheio:0.2.3'
 }
 ```
 
