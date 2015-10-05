@@ -25,39 +25,39 @@ public class CacheSqliteManager implements CacheDataSource {
 
   @SuppressWarnings("unchecked") @Override public <T> CacheEntry obtain(String key) {
     Cursor result = db.query(
-        "SELECT * FROM "
-+ CacheTableMeta.TABLE + " WHERE " + CacheTableMeta.COLUMN_KEY + " = ?",
+        "SELECT * FROM " + CacheTableMeta.TABLE + " WHERE " + CacheTableMeta.COLUMN_KEY + " = ?",
         key);
 
-    if (result.getCount() >= 1) {
-      List values = new ArrayList(result.getCount());
-      String keyDb = null;
-      Class<?> type = null;
+    if (result.moveToFirst()) {
+      int metadataTypeColumnIndex = result.getColumnIndex(CacheTableMeta.COLUMN_METADATA);
+      String metadata = result.getString(metadataTypeColumnIndex);
 
-      while (result.moveToNext()) {
-        int keyColumnIndex = result.getColumnIndex(CacheTableMeta.COLUMN_KEY);
-        int typeColumnIndex = result.getColumnIndex(CacheTableMeta.COLUMN_TYPE);
-        int valueColumnIndex = result.getColumnIndex(CacheTableMeta.COLUMN_VALUE);
+      if (metadata.equals(List.class.getSimpleName())) {
+        // It's a list
+        List values = new ArrayList(result.getCount());
+        Object firstObject = getObjectFromCursor(result);
 
+        values.add(firstObject);
+
+        String dbKey = getKeyDbFromCursor(result);
+
+        Class<?> type;
         try {
-          keyDb = result.getString(keyColumnIndex);
-          String typeStringDb = result.getString(typeColumnIndex);
-          byte[] value = result.getBlob(valueColumnIndex);
-
-          type = Class.forName(typeStringDb);
-          String jsonValue = new String(value);
-          Object object = gson.fromJson(jsonValue, type);
-
-          values.add((T) type.cast(object));
+          type = getClassTypeFromCursor(result);
         } catch (ClassNotFoundException e) {
-          // TODO: 17/09/15 Handle this error
+          type = null;
+          // TODO: 05/10/15 Check this implementation
           e.printStackTrace();
         }
-      }
 
-      return CacheEntry.create(keyDb, type, values);
-    } else {
-      if (result.moveToFirst()) {
+        while (result.moveToNext()) {
+          Object nextObject = getObjectFromCursor(result);
+          values.add(nextObject);
+        }
+
+        return CacheEntry.create(dbKey, type, values);
+      } else if (metadata.equals(Object.class.getSimpleName())) {
+        // It's a object
         int keyColumnIndex = result.getColumnIndex(CacheTableMeta.COLUMN_KEY);
         int typeColumnIndex = result.getColumnIndex(CacheTableMeta.COLUMN_TYPE);
         int valueColumnIndex = result.getColumnIndex(CacheTableMeta.COLUMN_VALUE);
@@ -78,7 +78,6 @@ public class CacheSqliteManager implements CacheDataSource {
         }
       }
     }
-
     return null;
   }
 
@@ -114,7 +113,8 @@ public class CacheSqliteManager implements CacheDataSource {
 
       String index = StoreObject.generateIndex(cacheEntry.getKey(), String.valueOf(position));
       StoreObject storeObject =
-          StoreObject.create(cacheEntry.getKey(), cacheEntry.getTypeCannonicalName(), value, index);
+          StoreObject.create(cacheEntry.getKey(), cacheEntry.getTypeCannonicalName(), value, index,
+              List.class.getSimpleName());
       objectsToPersist.add(storeObject);
     }
 
@@ -144,11 +144,45 @@ public class CacheSqliteManager implements CacheDataSource {
   private void persistSingleObject(CacheEntry cacheEntry) {
     byte[] value = gson.toJson(cacheEntry.getValue()).getBytes();
     StoreObject storeObject =
-        StoreObject.create(cacheEntry.getKey(), cacheEntry.getType().getCanonicalName(), value, null /*index*/);
+        StoreObject.create(cacheEntry.getKey(), cacheEntry.getType().getCanonicalName(), value, null /*index*/,
+            Object.class.getSimpleName());
 
     ContentValues contentValues = StoreObject.toContentValues(storeObject);
 
     db.delete(CacheTableMeta.TABLE, CacheTableMeta.COLUMN_KEY + " = ?", cacheEntry.getKey());
     db.insert(CacheTableMeta.TABLE, contentValues);
+  }
+
+  private Object getObjectFromCursor(Cursor result) {
+    Class<?> type;
+
+    //while (result.moveToNext()) {
+    int typeColumnIndex = result.getColumnIndex(CacheTableMeta.COLUMN_TYPE);
+    int valueColumnIndex = result.getColumnIndex(CacheTableMeta.COLUMN_VALUE);
+
+    try {
+      String typeStringDb = result.getString(typeColumnIndex);
+      byte[] value = result.getBlob(valueColumnIndex);
+
+      type = Class.forName(typeStringDb);
+      String jsonValue = new String(value);
+      return gson.fromJson(jsonValue, type);
+    } catch (ClassNotFoundException e) {
+      // TODO: 17/09/15 Handle this error
+      e.printStackTrace();
+    }
+
+    return null;
+  }
+
+  private String getKeyDbFromCursor(Cursor result) {
+    int keyColumnIndex = result.getColumnIndex(CacheTableMeta.COLUMN_KEY);
+    return result.getString(keyColumnIndex);
+  }
+
+  private Class<?> getClassTypeFromCursor(Cursor result) throws ClassNotFoundException {
+    int typeColumnIndex = result.getColumnIndex(CacheTableMeta.COLUMN_TYPE);
+    String type = result.getString(typeColumnIndex);
+    return Class.forName(type);
   }
 }
