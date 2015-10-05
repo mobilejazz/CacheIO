@@ -30,6 +30,8 @@ public class CacheOpenHelper extends SQLiteOpenHelper {
         + " BLOB NOT NULL, "
         + CacheTableMeta.COLUMN_INDEX
         + " TEXT NOT NULL, "
+        + CacheTableMeta.COLUMN_METADATA
+        + " TEXT NOT NULL, "
         + CacheTableMeta.COLUMN_TIMESTAMP
         + " INTEGER NOT NULL,"
         + " PRIMARY KEY ("
