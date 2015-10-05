@@ -16,16 +16,19 @@ public class StoreObject implements TimestampCachingObject {
 
   private String index;
 
+  private String metadata;
+
   private long timestamp;
 
   public StoreObject() {
   }
 
   public StoreObject(String key, @NonNull String type, @NonNull byte[] value, String index,
-      long timestamp) {
+      String metadata, long timestamp) {
     this.key = key;
     this.type = type;
     this.value = value;
+    this.metadata = metadata;
     this.timestamp = timestamp;
 
     if (index == null) {
@@ -36,8 +39,8 @@ public class StoreObject implements TimestampCachingObject {
   }
 
   public static StoreObject create(@NonNull String key, @NonNull String type, byte[] value,
-      String index) {
-    return new StoreObject(key, type, value, index, System.currentTimeMillis());
+      String index, @NonNull String metadata) {
+    return new StoreObject(key, type, value, index, metadata, System.currentTimeMillis());
   }
 
   public static String generateIndex(String key, String index) {
@@ -54,6 +57,7 @@ public class StoreObject implements TimestampCachingObject {
     contentValues.put(CacheTableMeta.COLUMN_TYPE, storeObject.getType());
     contentValues.put(CacheTableMeta.COLUMN_VALUE, storeObject.getValue());
     contentValues.put(CacheTableMeta.COLUMN_INDEX, storeObject.getIndex());
+    contentValues.put(CacheTableMeta.COLUMN_METADATA, storeObject.getMetadata());
     contentValues.put(CacheTableMeta.COLUMN_TIMESTAMP, storeObject.getTimestamp());
 
     return contentValues;
@@ -77,5 +81,9 @@ public class StoreObject implements TimestampCachingObject {
 
   @Override public long getTimestamp() {
     return timestamp;
+  }
+
+  public String getMetadata() {
+    return metadata;
   }
 }

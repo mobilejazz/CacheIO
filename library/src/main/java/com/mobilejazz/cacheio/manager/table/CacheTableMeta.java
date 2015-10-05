@@ -12,6 +12,8 @@ public class CacheTableMeta {
 
   @NonNull public static final String COLUMN_VALUE = "value";
 
+  @NonNull public static final String COLUMN_METADATA = "metadata";
+
   @NonNull public static final String COLUMN_INDEX = "_index";
 
   @NonNull public static final String COLUMN_TIMESTAMP = "timestamp";
