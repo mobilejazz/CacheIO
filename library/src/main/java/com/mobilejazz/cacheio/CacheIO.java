@@ -12,10 +12,12 @@ public class CacheIO {
 
   public CacheIO(Gson gson, String dbName, Context context, boolean logging) {
     SqlBrite sqlBrite = SqlBrite.create();
-    BriteDatabase briteDatabase =
-        sqlBrite.wrapDatabaseHelper(new CacheOpenHelper(context, dbName));
+    BriteDatabase briteDatabase = sqlBrite.wrapDatabaseHelper(new CacheOpenHelper(context, dbName));
 
-    cache = new CacheManager(gson, briteDatabase);
+    Persitence persitence = new PersitenceSqlLite(briteDatabase);
+    Serializer serializer = new GsonSerializer(gson);
+
+    cache = new CacheManager(persitence, serializer);
   }
 
   public Cache cacheDataSource() {
