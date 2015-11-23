@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 
-group='com.github.mobilejazz'
+group = 'com.github.mobilejazz'
 
 android {
   compileSdkVersion 23
@@ -28,4 +28,9 @@ dependencies {
   compile 'com.squareup.sqlbrite:sqlbrite:0.3.1'
   compile 'com.android.support:support-annotations:23.0.1'
   compile 'com.google.code.gson:gson:2.3'
+
+  testCompile 'junit:junit:4.12'
+  testCompile 'org.assertj:assertj-core:1.7.1'
+  testCompile 'org.mockito:mockito-core:1.9.5'
+  testCompile 'org.robolectric:robolectric:3.0'
 }
