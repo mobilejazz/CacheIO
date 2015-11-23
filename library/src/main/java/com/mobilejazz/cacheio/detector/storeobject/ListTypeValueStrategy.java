@@ -15,7 +15,9 @@ public class ListTypeValueStrategy implements TypeValueStrategy {
     String index;
 
     for (int position = 0; position < list.size(); position++) {
-      bytes = serializer.toBytes(cacheEntry.getValue());
+      Object object = list.get(position);
+
+      bytes = serializer.toBytes(object);
       index = StoreObject.generateIndex(cacheEntry.getKey(), String.valueOf(position));
 
       StoreObject storeObject = new StoreObjectBuilder().setKey(cacheEntry.getKey())
