@@ -45,7 +45,7 @@ public class InitialActivity extends AppCompatActivity {
     //CacheEntry cacheEntryUserList = CacheEntry.create("user.key.list", User.class, users, 12);
     CacheEntry<List<User>> cacheEntryUserList = new CacheEntry();
     cacheEntryUserList.setKey("user.key.list");
-    cacheEntryUserList.setType(User.class);
+    //cacheEntryUserList.setType(User.class);
     cacheEntryUserList.setValue(users);
     cacheEntryUserList.setExpiryMillis(12);
 
@@ -68,9 +68,9 @@ public class InitialActivity extends AppCompatActivity {
     userThree.setId(3);
     userThree.setName("Aldo Borrero");
 
-    CacheEntry cacheEntryUserThree = CacheEntry.create("user.key.three", User.class, userThree);
-    cache.persist(cacheEntryUserThree);
-    cache.delete("user.key.three");
+    //CacheEntry cacheEntryUserThree = CacheEntry.create("user.key.three", User.class, userThree);
+    //cache.persist(cacheEntryUserThree);
+    //cache.delete("user.key.three");
 
     CacheEntry emptyUserThreeEntry = cache.obtain("user.key.three");
     Log.d(TAG, "Cache is emptied for User three: " + String.valueOf(emptyUserThreeEntry == null));
