@@ -36,7 +36,7 @@ public class CacheEntry<T> {
   }
 
   @SuppressWarnings("unchecked")
-  public static <T> CacheEntry<T> create(String key, Class<T> type, T value, long expiryMillis) {
+  public static <T, V> CacheEntry create(String key, Class<T> type, V value, long expiryMillis) {
     return new CacheEntry(key, type, value, expiryMillis);
   }
 
