@@ -8,18 +8,18 @@ import com.squareup.sqlbrite.SqlBrite;
 
 public class CacheIO {
 
-  private CacheDataSource cacheDataSource;
+  private Cache cache;
 
   public CacheIO(Gson gson, String dbName, Context context, boolean logging) {
     SqlBrite sqlBrite = SqlBrite.create();
     BriteDatabase briteDatabase =
         sqlBrite.wrapDatabaseHelper(new CacheOpenHelper(context, dbName));
 
-    cacheDataSource = new CacheSqliteManager(gson, briteDatabase);
+    cache = new CacheManager(gson, briteDatabase);
   }
 
-  public CacheDataSource cacheDataSource() {
-    return cacheDataSource;
+  public Cache cacheDataSource() {
+    return cache;
   }
 
   public static Builder with(Context context) {

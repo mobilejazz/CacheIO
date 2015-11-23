@@ -12,7 +12,9 @@ public class CacheTableMeta {
 
   @NonNull public static final String COLUMN_VALUE = "value";
 
-  @NonNull public static final String COLUMN_METADATA = "metadata";
+  @NonNull public static final String COLUMN_EXPIRY_MILLIS = "expiry";
+
+  @NonNull public static final String COLUMN_METATYPE = "metatype";
 
   @NonNull public static final String COLUMN_INDEX = "_index";
 

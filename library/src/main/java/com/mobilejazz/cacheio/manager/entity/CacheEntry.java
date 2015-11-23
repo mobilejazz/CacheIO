@@ -1,17 +1,43 @@
 package com.mobilejazz.cacheio.manager.entity;
 
-import android.support.annotation.NonNull;
-
 public class CacheEntry<T> {
 
-  private String key; // key string
-  private Class<T> type; // type string
-  private T value; // bytes blob
+  /**
+   * String key that identifies this object in the storage
+   */
+  private String key;
 
-  public CacheEntry(String key, Class<T> type, T value) {
+  /**
+   * Type of the object that you are saving in the storage
+   */
+  private Class<T> type;
+
+  /**
+   * Object to save
+   */
+  private T value;
+
+  /**
+   * Period of time that the object is live in the storage.
+   */
+  private long expiryMillis;
+
+  /**
+   * Private constructor
+   */
+  private CacheEntry(String key, Class<T> type, T value, long expiryMillis) {
     this.key = key;
     this.type = type;
     this.value = value;
+    this.expiryMillis = expiryMillis;
+  }
+
+  public CacheEntry() {
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> CacheEntry<T> create(String key, Class<T> type, T value, long expiryMillis) {
+    return new CacheEntry(key, type, value, expiryMillis);
   }
 
   public String getKey() {
@@ -26,12 +52,27 @@ public class CacheEntry<T> {
     return value;
   }
 
+  public long getExpiryMillis() {
+    return expiryMillis;
+  }
+
   public String getTypeCannonicalName() {
     return type.getCanonicalName();
   }
 
-  @SuppressWarnings("unchecked")
-  public static <T> CacheEntry create(@NonNull String key, @NonNull Class<?> type, T value) {
-    return new CacheEntry(key, type, value);
+  public void setKey(String key) {
+    this.key = key;
+  }
+
+  public void setType(Class<T> type) {
+    this.type = type;
+  }
+
+  public void setValue(T value) {
+    this.value = value;
+  }
+
+  public void setExpiryMillis(long expiryMillis) {
+    this.expiryMillis = expiryMillis;
   }
 }

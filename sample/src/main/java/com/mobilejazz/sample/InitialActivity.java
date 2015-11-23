@@ -3,7 +3,7 @@ package com.mobilejazz.sample;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import com.mobilejazz.cacheio.CacheDataSource;
+import com.mobilejazz.cacheio.Cache;
 import com.mobilejazz.cacheio.CacheIO;
 import com.mobilejazz.cacheio.manager.entity.CacheEntry;
 import com.mobilejazz.sample.gson.GsonFactory;
@@ -25,7 +25,7 @@ public class InitialActivity extends AppCompatActivity {
         .addGson(GsonFactory.create())
         .build();
 
-    CacheDataSource cacheDataSource = cacheIO.cacheDataSource();
+    Cache cache = cacheIO.cacheDataSource();
 
     User userOne = new User();
     userOne.setId(1);
@@ -35,22 +35,29 @@ public class InitialActivity extends AppCompatActivity {
     userTwo.setId(2);
     userTwo.setName("Test user");
 
-    CacheEntry cacheEntryUserOne = CacheEntry.create("user.key.one", User.class, userOne);
-    cacheDataSource.persist(cacheEntryUserOne);
+    CacheEntry cacheEntryUserOne = CacheEntry.create("user.key.one", User.class, userOne, 12);
+    cache.persist(cacheEntryUserOne);
 
     List<User> users = new ArrayList<>();
     users.add(userOne);
     users.add(userTwo);
 
-    CacheEntry cacheEntryUserList = CacheEntry.create("user.key.list", User.class, users);
-    cacheDataSource.persist(cacheEntryUserList);
+    //CacheEntry cacheEntryUserList = CacheEntry.create("user.key.list", User.class, users, 12);
+    CacheEntry<List<User>> cacheEntryUserList = new CacheEntry();
+    cacheEntryUserList.setKey("user.key.list");
+    cacheEntryUserList.setType(User.class);
+    cacheEntryUserList.setValue(users);
+    cacheEntryUserList.setExpiryMillis(12);
 
-    CacheEntry resultQueryUserOne = cacheDataSource.obtain("user.key.one");
+
+    cache.persist(cacheEntryUserList);
+
+    CacheEntry resultQueryUserOne = cache.obtain("user.key.one");
 
     User resultUser = (User) resultQueryUserOne.getValue();
     Log.d(TAG, resultUser.toString());
 
-    CacheEntry resultQueryUserList = cacheDataSource.obtain("user.key.list");
+    CacheEntry resultQueryUserList = cache.obtain("user.key.list");
 
     List<User> resultQueryListUsers = (List<User>) resultQueryUserList.getValue();
     for (User user : resultQueryListUsers) {
@@ -62,10 +69,10 @@ public class InitialActivity extends AppCompatActivity {
     userThree.setName("Aldo Borrero");
 
     CacheEntry cacheEntryUserThree = CacheEntry.create("user.key.three", User.class, userThree);
-    cacheDataSource.persist(cacheEntryUserThree);
-    cacheDataSource.delete("user.key.three");
+    cache.persist(cacheEntryUserThree);
+    cache.delete("user.key.three");
 
-    CacheEntry emptyUserThreeEntry = cacheDataSource.obtain("user.key.three");
+    CacheEntry emptyUserThreeEntry = cache.obtain("user.key.three");
     Log.d(TAG, "Cache is emptied for User three: " + String.valueOf(emptyUserThreeEntry == null));
   }
 }

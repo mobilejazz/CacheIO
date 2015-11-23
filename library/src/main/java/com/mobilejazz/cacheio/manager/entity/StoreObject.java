@@ -14,21 +14,25 @@ public class StoreObject implements TimestampCachingObject {
 
   private byte[] value;
 
+  private long expiryMillis;
+
   private String index;
 
-  private String metadata;
+  private String metaType;
 
   private long timestamp;
 
-  public StoreObject() {
-  }
-
-  public StoreObject(String key, @NonNull String type, @NonNull byte[] value, String index,
-      String metadata, long timestamp) {
+  /**
+   * Constructor
+   */
+  private StoreObject(String key, String type, byte[] value, long expiryMillis, String index,
+      String metaType, long timestamp) {
     this.key = key;
     this.type = type;
     this.value = value;
-    this.metadata = metadata;
+    this.expiryMillis = expiryMillis;
+    this.index = index;
+    this.metaType = metaType;
     this.timestamp = timestamp;
 
     if (index == null) {
@@ -36,31 +40,6 @@ public class StoreObject implements TimestampCachingObject {
     } else {
       this.index = index;
     }
-  }
-
-  public static StoreObject create(@NonNull String key, @NonNull String type, byte[] value,
-      String index, @NonNull String metadata) {
-    return new StoreObject(key, type, value, index, metadata, System.currentTimeMillis());
-  }
-
-  public static String generateIndex(String key, String index) {
-    StringBuilder builder = new StringBuilder();
-    builder.append(key);
-    builder.append("-");
-    builder.append(index);
-    return builder.toString();
-  }
-
-  public static ContentValues toContentValues(StoreObject storeObject) {
-    ContentValues contentValues = new ContentValues();
-    contentValues.put(CacheTableMeta.COLUMN_KEY, storeObject.getKey());
-    contentValues.put(CacheTableMeta.COLUMN_TYPE, storeObject.getType());
-    contentValues.put(CacheTableMeta.COLUMN_VALUE, storeObject.getValue());
-    contentValues.put(CacheTableMeta.COLUMN_INDEX, storeObject.getIndex());
-    contentValues.put(CacheTableMeta.COLUMN_METADATA, storeObject.getMetadata());
-    contentValues.put(CacheTableMeta.COLUMN_TIMESTAMP, storeObject.getTimestamp());
-
-    return contentValues;
   }
 
   @Nullable public String getKey() {
@@ -83,7 +62,41 @@ public class StoreObject implements TimestampCachingObject {
     return timestamp;
   }
 
-  public String getMetadata() {
-    return metadata;
+  @Override public long getExpiredMillis() {
+    return expiryMillis;
+  }
+
+  public String getMetaType() {
+    return metaType;
+  }
+
+  // Public methods
+
+  public static String generateIndex(String key, String index) {
+    StringBuilder builder = new StringBuilder();
+    builder.append(key);
+    builder.append("-");
+    builder.append(index);
+    return builder.toString();
+  }
+
+  public static ContentValues toContentValues(StoreObject storeObject) {
+    ContentValues contentValues = new ContentValues();
+    contentValues.put(CacheTableMeta.COLUMN_KEY, storeObject.getKey());
+    contentValues.put(CacheTableMeta.COLUMN_TYPE, storeObject.getType());
+    contentValues.put(CacheTableMeta.COLUMN_VALUE, storeObject.getValue());
+    contentValues.put(CacheTableMeta.COLUMN_EXPIRY_MILLIS, storeObject.getExpiredMillis());
+    contentValues.put(CacheTableMeta.COLUMN_INDEX, storeObject.getIndex());
+    contentValues.put(CacheTableMeta.COLUMN_METATYPE, storeObject.getMetaType());
+    contentValues.put(CacheTableMeta.COLUMN_TIMESTAMP, storeObject.getTimestamp());
+
+    return contentValues;
+  }
+
+  // Factory method
+
+  public static StoreObject create(String key, @NonNull String type, @NonNull byte[] value,
+      long expiryMillis, String index, String metadata, long timestamp) {
+    return new StoreObject(key, type, value, expiryMillis, index, metadata, timestamp);
   }
 }

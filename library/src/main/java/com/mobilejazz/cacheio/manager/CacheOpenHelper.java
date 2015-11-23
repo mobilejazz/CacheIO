@@ -14,9 +14,7 @@ public class CacheOpenHelper extends SQLiteOpenHelper {
     super(context, databaseName, null, DB_VERSION);
   }
 
-  ///////////////////////////////////////////////////////////////////////////
   // Private methods
-  ///////////////////////////////////////////////////////////////////////////
 
   @NonNull private static String getCreateCacheTableQuery() {
     return "CREATE TABLE "
@@ -28,9 +26,11 @@ public class CacheOpenHelper extends SQLiteOpenHelper {
         + " TEXT NOT NULL, "
         + CacheTableMeta.COLUMN_VALUE
         + " BLOB NOT NULL, "
+        + CacheTableMeta.COLUMN_EXPIRY_MILLIS
+        + " INTEGER NOT NULL, "
         + CacheTableMeta.COLUMN_INDEX
         + " TEXT NOT NULL, "
-        + CacheTableMeta.COLUMN_METADATA
+        + CacheTableMeta.COLUMN_METATYPE
         + " TEXT NOT NULL, "
         + CacheTableMeta.COLUMN_TIMESTAMP
         + " INTEGER NOT NULL,"
