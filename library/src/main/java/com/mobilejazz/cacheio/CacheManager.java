@@ -3,12 +3,9 @@ package com.mobilejazz.cacheio;
 import android.content.ContentValues;
 import android.database.Cursor;
 import com.google.gson.Gson;
-import com.mobilejazz.cacheio.exceptions.InvalidCacheException;
 import com.mobilejazz.cacheio.manager.entity.CacheEntry;
 import com.mobilejazz.cacheio.manager.entity.StoreObject;
 import com.mobilejazz.cacheio.manager.table.CacheTableMeta;
-import com.mobilejazz.cacheio.strategy.CachingStrategy;
-import com.mobilejazz.cacheio.strategy.CachingStrategyObject;
 import com.squareup.sqlbrite.BriteDatabase;
 import java.util.ArrayList;
 import java.util.List;
@@ -96,23 +93,18 @@ public class CacheManager implements Cache {
     return null;
   }
 
-  @Override public void persist(CacheEntry cacheEntry) {
+  @Override public boolean persist(CacheEntry cacheEntry) {
     if (cacheEntry.getValue() instanceof List) {
       persistListOfObjects(cacheEntry);
     } else {
       persistSingleObject(cacheEntry);
     }
+    return false;
   }
 
-  @Override public void delete(String key) {
+  @Override public boolean delete(String key) {
     db.delete(CacheTableMeta.TABLE, CacheTableMeta.COLUMN_KEY + " = ?", key);
-  }
-
-  @Override public <T extends CachingStrategyObject> void executeValidation(StoreObject storeObject,
-      CachingStrategy<T> strategy) throws InvalidCacheException {
-    throw new IllegalStateException("executeValidation() is not implemented");
-
-    //long timestamp = storeObject.getTimestamp();
+    return false;
   }
 
   ///////////////////////////////////////////////////////////////////////////
@@ -160,6 +152,20 @@ public class CacheManager implements Cache {
   }
 
   private void persistSingleObject(CacheEntry cacheEntry) {
+
+    // New Implementation
+    Class type = cacheEntry.getType();
+
+    Serialiser serialiser = new GsonSerialiser(gson);
+    byte[] bytes = serialiser.toBytes(cacheEntry.getValue());
+
+    Object object = serialiser.fromBytes(bytes, type);
+
+    // Old implementation
+
+
+
+
     byte[] value = gson.toJson(cacheEntry.getValue()).getBytes();
     StoreObject storeObject =
         StoreObject.create(cacheEntry.getKey(), cacheEntry.getType().getCanonicalName(), value,
