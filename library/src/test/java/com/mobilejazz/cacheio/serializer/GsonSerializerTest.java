@@ -2,20 +2,20 @@ package com.mobilejazz.cacheio.serializer;
 
 import com.google.gson.Gson;
 import com.mobilejazz.cacheio.ApplicationTestCase;
-import com.mobilejazz.cacheio.GsonSerialiser;
-import com.mobilejazz.cacheio.Serialiser;
+import com.mobilejazz.cacheio.GsonSerializer;
+import com.mobilejazz.cacheio.Serializer;
 import com.mobilejazz.cacheio.model.UserTestModel;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 
-public class GsonSerialiserTest extends ApplicationTestCase {
+public class GsonSerializerTest extends ApplicationTestCase {
 
-  private Serialiser serialiser;
+  private Serializer serialiser;
 
   @Before public void setUp() throws Exception {
     Gson gson = new Gson();
-    serialiser = new GsonSerialiser(gson);
+    serialiser = new GsonSerializer(gson);
   }
 
   @Test public void shouldSerialiseAObject() throws Exception {
@@ -32,7 +32,7 @@ public class GsonSerialiserTest extends ApplicationTestCase {
     byte[] userDeserialized = fakeUserTestBytes(userTestModelToDeserialize);
 
     UserTestModel userTestModelExpected =
-        (UserTestModel) serialiser.fromBytes(userDeserialized, UserTestModel.class);
+        serialiser.fromBytes(userDeserialized, UserTestModel.class);
 
     Assertions.assertThat(userTestModelExpected).isNotNull();
     Assertions.assertThat(userTestModelExpected.getId())
