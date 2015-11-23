@@ -6,6 +6,7 @@ import com.mobilejazz.cacheio.exceptions.CacheErrorException;
 import com.mobilejazz.cacheio.exceptions.CacheNotFoundException;
 import com.mobilejazz.cacheio.exceptions.ExpiredCacheException;
 import com.mobilejazz.cacheio.manager.entity.StoreObject;
+import com.mobilejazz.cacheio.manager.entity.StoreObjectBuilder;
 import com.mobilejazz.cacheio.manager.table.CacheTableMeta;
 import com.mobilejazz.cacheio.strategy.CachingStrategy;
 import com.mobilejazz.cacheio.strategy.CachingStrategyObject;
@@ -46,8 +47,14 @@ public class PersitenceSqlLite implements Persitence {
       String index = entry.getString(indexColumn);
       long timestamp = entry.getLong(timestampColumn);
 
-      StoreObject storeObject =
-          StoreObject.create(keyValue, type, value, expiryMillis, index, metatype, timestamp);
+      StoreObject storeObject = new StoreObjectBuilder().setIndex(keyValue)
+          .setType(type)
+          .setValue(value)
+          .setExpiryMillis(expiryMillis)
+          .setIndex(index)
+          .setMetaType(metatype)
+          .setTimestamp(timestamp)
+          .build();
 
       result.add(storeObject);
     }

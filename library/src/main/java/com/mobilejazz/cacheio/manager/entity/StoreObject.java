@@ -25,7 +25,7 @@ public class StoreObject implements TimestampCachingObject {
   /**
    * Constructor
    */
-  private StoreObject(String key, String type, byte[] value, long expiryMillis, String index,
+  StoreObject(String key, String type, byte[] value, long expiryMillis, String index,
       String metaType, long timestamp) {
     this.key = key;
     this.type = type;
@@ -73,7 +73,7 @@ public class StoreObject implements TimestampCachingObject {
   // Public methods
 
   public static String generateIndex(String key, String index) {
-    StringBuilder builder = new StringBuilder();
+    StringBuilder builder = new StringBuilder(key.length() + index.length() + 1);
     builder.append(key);
     builder.append("-");
     builder.append(index);
@@ -91,12 +91,5 @@ public class StoreObject implements TimestampCachingObject {
     contentValues.put(CacheTableMeta.COLUMN_TIMESTAMP, storeObject.getTimestamp());
 
     return contentValues;
-  }
-
-  // Factory method
-
-  public static StoreObject create(String key, @NonNull String type, @NonNull byte[] value,
-      long expiryMillis, String index, String metadata, long timestamp) {
-    return new StoreObject(key, type, value, expiryMillis, index, metadata, timestamp);
   }
 }
