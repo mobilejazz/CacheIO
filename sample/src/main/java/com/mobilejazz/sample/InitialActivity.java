@@ -39,17 +39,10 @@ public class InitialActivity extends AppCompatActivity {
     cache.persist(cacheEntryUserOne);
 
     List<User> users = new ArrayList<>();
-    users.add(userOne);
+    //users.add(userOne);
     users.add(userTwo);
 
-    //CacheEntry cacheEntryUserList = CacheEntry.create("user.key.list", User.class, users, 12);
-    CacheEntry<List<User>> cacheEntryUserList = new CacheEntry();
-    cacheEntryUserList.setKey("user.key.list");
-    //cacheEntryUserList.setType(User.class);
-    cacheEntryUserList.setValue(users);
-    cacheEntryUserList.setExpiryMillis(12);
-
-
+    CacheEntry cacheEntryUserList = CacheEntry.create("user.key.list", User.class, users, 12);
     cache.persist(cacheEntryUserList);
 
     CacheEntry resultQueryUserOne = cache.obtain("user.key.one");
@@ -64,15 +57,15 @@ public class InitialActivity extends AppCompatActivity {
       Log.d(TAG, user.toString());
     }
 
-    User userThree = new User();
+/*    User userThree = new User();
     userThree.setId(3);
-    userThree.setName("Aldo Borrero");
+    userThree.setName("Aldo Borrero");*/
 
     //CacheEntry cacheEntryUserThree = CacheEntry.create("user.key.three", User.class, userThree);
     //cache.persist(cacheEntryUserThree);
     //cache.delete("user.key.three");
 
-    CacheEntry emptyUserThreeEntry = cache.obtain("user.key.three");
-    Log.d(TAG, "Cache is emptied for User three: " + String.valueOf(emptyUserThreeEntry == null));
+    //CacheEntry emptyUserThreeEntry = cache.obtain("user.key.three");
+    //Log.d(TAG, "Cache is emptied for User three: " + String.valueOf(emptyUserThreeEntry == null));
   }
 }
