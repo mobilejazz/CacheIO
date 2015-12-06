@@ -8,21 +8,22 @@ import com.mobilejazz.cacheio.exceptions.CacheErrorException;
 import com.mobilejazz.cacheio.exceptions.CacheNotFoundException;
 import com.mobilejazz.cacheio.manager.entity.CacheEntry;
 import com.mobilejazz.cacheio.manager.entity.StoreObject;
+import com.mobilejazz.cacheio.serializer.Serializer;
 import java.util.List;
 
 public class CacheManager implements Cache {
 
-  private final Persitence persitence;
+  private final Persistence persistence;
   private final Serializer serializer;
 
-  public CacheManager(Persitence persitence, Serializer serializer) {
-    this.persitence = persitence;
+  public CacheManager(Persistence persistence, Serializer serializer) {
+    this.persistence = persistence;
     this.serializer = serializer;
   }
 
   @SuppressWarnings("unchecked") @Override public <T> CacheEntry<T> obtain(String key) {
     try {
-      List<StoreObject> storeObjects = persitence.obtain(key);
+      List<StoreObject> storeObjects = persistence.obtain(key);
       CacheValueStrategy strategy = CacheEntryDetectorFactory.obtain(storeObjects);
 
       return strategy.convert(serializer, storeObjects);
@@ -42,7 +43,7 @@ public class CacheManager implements Cache {
 
     List<StoreObject> storeObjects = strategy.convert(serializer, cacheEntry);
     try {
-      return persitence.persist(storeObjects);
+      return persistence.persist(storeObjects);
     } catch (CacheErrorException e) {
       e.printStackTrace();
       return false;
@@ -51,7 +52,7 @@ public class CacheManager implements Cache {
 
   @Override public boolean delete(String key) {
     try {
-      return persitence.delete(key);
+      return persistence.delete(key);
     } catch (CacheErrorException e) {
       e.printStackTrace();
       return false;

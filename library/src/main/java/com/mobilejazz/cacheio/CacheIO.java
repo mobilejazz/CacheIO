@@ -1,26 +1,33 @@
 package com.mobilejazz.cacheio;
 
 import android.content.Context;
-import com.google.gson.Gson;
-import com.mobilejazz.cacheio.manager.CacheOpenHelper;
-import com.squareup.sqlbrite.BriteDatabase;
-import com.squareup.sqlbrite.SqlBrite;
+import com.mobilejazz.cacheio.internal.helper.Preconditions;
+import com.mobilejazz.cacheio.logging.EmptyLogger;
+import com.mobilejazz.cacheio.logging.Logger;
+import com.mobilejazz.cacheio.serializer.Serializer;
 
 public class CacheIO {
 
-  private Cache cache;
+  private final Cache cache;
+  private final Logger logger;
 
-  public CacheIO(Gson gson, String dbName, Context context, boolean logging) {
-    SqlBrite sqlBrite = SqlBrite.create();
-    BriteDatabase briteDatabase = sqlBrite.wrapDatabaseHelper(new CacheOpenHelper(context, dbName));
-
-    Persitence persitence = new PersitenceSqlLite(briteDatabase);
-    Serializer serializer = new GsonSerializer(gson);
-
-    cache = new CacheManager(persitence, serializer);
+  private CacheIO(Persistence persistence, Serializer serializer, Logger logger) {
+    this.cache = new CacheManager(persistence, serializer);
+    this.logger = logger;
   }
 
+  //public CacheIO(Context context, Gson gson, String dbName, boolean logging) {
+  //  SqlBrite sqlBrite = SqlBrite.create();
+  //  BriteDatabase briteDatabase = sqlBrite.wrapDatabaseHelper(new CacheOpenHelper(context, dbName));
+  //
+  //  Persistence persitence = new PersistenceSqlLite(briteDatabase);
+  //  Serializer serializer = new GsonSerializer(gson);
+  //
+  //  cache = new CacheManager(persitence, serializer);
+  //}
+
   public Cache cacheDataSource() {
+    Preconditions.checkNotNull(cache, "cache == null! Create one using Builder instance!");
     return cache;
   }
 
@@ -28,36 +35,46 @@ public class CacheIO {
     return new Builder(context);
   }
 
-  public static class Builder {
+  public static final class Builder {
 
-    private Gson gson;
-    private String dbName;
-    private boolean logging;
     private Context context;
+    private Persistence persistence;
+    private Serializer serializer;
+    private Logger logger;
 
     public Builder(Context context) {
-      this.context = context;
+      this.context = context.getApplicationContext();
     }
 
-    public Builder addLogging(boolean value) {
-      this.logging = value;
+    public Builder serializer(Serializer serializer) {
+      this.serializer = Preconditions.checkNotNull(serializer, "serializer == null");
       return this;
     }
 
-    public Builder addDbName(String value) {
-      this.dbName = value;
+    public Builder persistence(Persistence persistence) {
+      this.persistence = Preconditions.checkNotNull(persistence, "persistence == null");
       return this;
     }
 
-    public Builder addGson(Gson gson) {
-      this.gson = gson;
+    public Builder logger(Logger logger) {
+      this.logger = Preconditions.checkNotNull(logger, "logger == null");
       return this;
     }
 
     public CacheIO build() {
-      // TODO: 17/09/15 Check all the values
+      if (persistence == null) {
+        throw new IllegalStateException("peristence == null");
+      }
 
-      return new CacheIO(gson, dbName, context, logging);
+      if (serializer == null) {
+        throw new IllegalStateException("serializer == null");
+      }
+
+      if (logger == null) {
+        this.logger = new EmptyLogger();
+      }
+
+      return new CacheIO(persistence, serializer, logger);
     }
   }
 }

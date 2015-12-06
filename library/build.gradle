@@ -1,5 +1,8 @@
+import org.moallemi.gradle.internal.VersionCodeType
+
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'org.moallemi.advanced-build-version'
 
 group = 'com.github.mobilejazz'
 
@@ -10,8 +13,8 @@ android {
   defaultConfig {
     minSdkVersion 14
     targetSdkVersion 23
-    versionCode 20151005
-    versionName "0.2.4"
+    versionCode advancedVersioning.versionCode
+    versionName advancedVersioning.versionName
   }
   buildTypes {
     release {
@@ -21,13 +24,27 @@ android {
   }
 }
 
+advancedVersioning {
+  outputOptions {
+    renameOutput false
+  }
+  codeOptions {
+    versionCodeType VersionCodeType.DATE
+  }
+  nameOptions {
+    versionMajor 0
+    versionMinor 2
+    versionPatch 5
+    //versionBuild 0
+  }
+}
+
 dependencies {
-  compile fileTree(dir: 'libs', include: ['*.jar'])
-  compile 'com.android.support:appcompat-v7:23.0.1'
+  compile 'com.android.support:appcompat-v7:23.1.1'
+  compile 'com.android.support:support-annotations:23.1.1'
 
   compile 'com.squareup.sqlbrite:sqlbrite:0.3.1'
-  compile 'com.android.support:support-annotations:23.0.1'
-  compile 'com.google.code.gson:gson:2.3'
+  compile 'com.google.code.gson:gson:2.4'
 
   testCompile 'junit:junit:4.12'
   testCompile 'org.assertj:assertj-core:1.7.1'

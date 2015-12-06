@@ -14,11 +14,11 @@ import com.squareup.sqlbrite.BriteDatabase;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PersitenceSqlLite implements Persitence {
+public class PersistenceSqlLite implements Persistence {
 
   private BriteDatabase db;
 
-  public PersitenceSqlLite(BriteDatabase briteDatabase) {
+  public PersistenceSqlLite(BriteDatabase briteDatabase) {
     this.db = briteDatabase;
   }
 
@@ -88,6 +88,8 @@ public class PersitenceSqlLite implements Persitence {
         db.delete(CacheTableMeta.TABLE, CacheTableMeta.COLUMN_KEY + " = ?",
             storeObjectToPersist.getKey());
         long result = db.insert(CacheTableMeta.TABLE, contentValues);
+
+        @SuppressWarnings("unused")
         boolean isPersisted = result > 0;
 
         return isPersisted;
@@ -135,6 +137,8 @@ public class PersitenceSqlLite implements Persitence {
   @Override public boolean delete(String key) throws CacheErrorException {
     try {
       long rowsAffected = db.delete(CacheTableMeta.TABLE, CacheTableMeta.COLUMN_KEY + " = ?", key);
+
+      @SuppressWarnings("unused")
       boolean isDeleted = rowsAffected > 0;
 
       return isDeleted;

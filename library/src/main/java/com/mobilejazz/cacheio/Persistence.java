@@ -8,7 +8,7 @@ import com.mobilejazz.cacheio.strategy.CachingStrategy;
 import com.mobilejazz.cacheio.strategy.CachingStrategyObject;
 import java.util.List;
 
-public interface Persitence {
+public interface Persistence {
 
   List<StoreObject> obtain(String key) throws CacheNotFoundException, CacheErrorException;
 

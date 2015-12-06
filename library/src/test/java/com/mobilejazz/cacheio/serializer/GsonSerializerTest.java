@@ -2,8 +2,6 @@ package com.mobilejazz.cacheio.serializer;
 
 import com.google.gson.Gson;
 import com.mobilejazz.cacheio.ApplicationTestCase;
-import com.mobilejazz.cacheio.GsonSerializer;
-import com.mobilejazz.cacheio.Serializer;
 import com.mobilejazz.cacheio.model.UserTestModel;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;

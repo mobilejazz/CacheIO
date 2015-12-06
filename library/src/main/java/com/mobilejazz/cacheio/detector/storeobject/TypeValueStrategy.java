@@ -1,7 +1,7 @@
 package com.mobilejazz.cacheio.detector.storeobject;
 
 import android.support.annotation.NonNull;
-import com.mobilejazz.cacheio.Serializer;
+import com.mobilejazz.cacheio.serializer.Serializer;
 import com.mobilejazz.cacheio.manager.entity.CacheEntry;
 import com.mobilejazz.cacheio.manager.entity.StoreObject;
 import java.util.Collections;

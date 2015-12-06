@@ -1,4 +1,4 @@
-package com.mobilejazz.cacheio;
+package com.mobilejazz.cacheio.serializer;
 
 import com.google.gson.Gson;
 
