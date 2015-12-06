@@ -6,13 +6,15 @@ apply plugin: 'org.moallemi.advanced-build-version'
 
 group = 'com.github.mobilejazz'
 
+def v = rootProject.ext
+
 android {
-  compileSdkVersion 23
-  buildToolsVersion "22.0.1"
+  compileSdkVersion v.compileSdkVersion
+  buildToolsVersion v.buildToolsVersion
 
   defaultConfig {
-    minSdkVersion 14
-    targetSdkVersion 23
+    minSdkVersion v.minSdkVersion
+    targetSdkVersion v.targetSdkVersion
     versionCode advancedVersioning.versionCode
     versionName advancedVersioning.versionName
   }
@@ -40,14 +42,11 @@ advancedVersioning {
 }
 
 dependencies {
-  compile 'com.android.support:appcompat-v7:23.1.1'
-  compile 'com.android.support:support-annotations:23.1.1'
+  compile "com.android.support:appcompat-v7:${v.supportLibrariesVersion}"
+  compile "com.android.support:support-annotations:${v.supportLibrariesVersion}"
 
-  compile 'com.squareup.sqlbrite:sqlbrite:0.3.1'
-  compile 'com.google.code.gson:gson:2.4'
-
-  testCompile 'junit:junit:4.12'
-  testCompile 'org.assertj:assertj-core:1.7.1'
-  testCompile 'org.mockito:mockito-core:1.9.5'
-  testCompile 'org.robolectric:robolectric:3.0'
+  testCompile "junit:junit:${v.junitVersion}"
+  testCompile "org.assertj:assertj-core:${v.assertJVersion}"
+  testCompile "org.mockito:mockito-core:${v.mockitoVersion}"
+  testCompile "org.robolectric:robolectric:${v.robolectricVersion}"
 }

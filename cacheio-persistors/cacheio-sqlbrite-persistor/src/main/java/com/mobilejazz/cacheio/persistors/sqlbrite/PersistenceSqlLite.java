@@ -1,4 +1,4 @@
-package com.mobilejazz.cacheio;
+package com.mobilejazz.cacheio.persistence;
 
 import android.content.ContentValues;
 import android.database.Cursor;

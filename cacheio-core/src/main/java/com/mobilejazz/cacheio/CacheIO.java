@@ -4,6 +4,7 @@ import android.content.Context;
 import com.mobilejazz.cacheio.internal.helper.Preconditions;
 import com.mobilejazz.cacheio.logging.EmptyLogger;
 import com.mobilejazz.cacheio.logging.Logger;
+import com.mobilejazz.cacheio.persistence.Persistence;
 import com.mobilejazz.cacheio.serializer.Serializer;
 
 public class CacheIO {
@@ -15,16 +16,6 @@ public class CacheIO {
     this.cache = new CacheManager(persistence, serializer);
     this.logger = logger;
   }
-
-  //public CacheIO(Context context, Gson gson, String dbName, boolean logging) {
-  //  SqlBrite sqlBrite = SqlBrite.create();
-  //  BriteDatabase briteDatabase = sqlBrite.wrapDatabaseHelper(new CacheOpenHelper(context, dbName));
-  //
-  //  Persistence persitence = new PersistenceSqlLite(briteDatabase);
-  //  Serializer serializer = new GsonSerializer(gson);
-  //
-  //  cache = new CacheManager(persitence, serializer);
-  //}
 
   public Cache cacheDataSource() {
     Preconditions.checkNotNull(cache, "cache == null! Create one using Builder instance!");

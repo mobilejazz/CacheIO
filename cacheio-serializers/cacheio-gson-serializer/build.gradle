@@ -1,0 +1,35 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'org.moallemi.advanced-build-version'
+
+group = 'com.github.mobilejazz'
+
+def v = rootProject.ext
+
+android {
+  compileSdkVersion v.compileSdkVersion
+  buildToolsVersion v.buildToolsVersion
+
+  defaultConfig {
+    minSdkVersion v.minSdkVersion
+    targetSdkVersion v.targetSdkVersion
+    versionCode advancedVersioning.versionCode
+    versionName advancedVersioning.versionName
+  }
+  buildTypes {
+    release {
+      minifyEnabled false
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+    }
+  }
+}
+
+dependencies {
+  compile project(':cacheio-core')
+  compile 'com.google.code.gson:gson:2.4'
+
+  testCompile "junit:junit:${v.junitVersion}"
+  testCompile "org.assertj:assertj-core:${v.assertJVersion}"
+  testCompile "org.mockito:mockito-core:${v.mockitoVersion}"
+  testCompile "org.robolectric:robolectric:${v.robolectricVersion}"
+}

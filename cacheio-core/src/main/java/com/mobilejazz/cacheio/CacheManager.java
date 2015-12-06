@@ -8,6 +8,7 @@ import com.mobilejazz.cacheio.exceptions.CacheErrorException;
 import com.mobilejazz.cacheio.exceptions.CacheNotFoundException;
 import com.mobilejazz.cacheio.manager.entity.CacheEntry;
 import com.mobilejazz.cacheio.manager.entity.StoreObject;
+import com.mobilejazz.cacheio.persistence.Persistence;
 import com.mobilejazz.cacheio.serializer.Serializer;
 import java.util.List;
 

@@ -1,6 +1,7 @@
-package com.mobilejazz.cacheio.serializer;
+package com.mobilejazz.cacheio.serializers.gson;
 
 import com.google.gson.Gson;
+import com.mobilejazz.cacheio.serializer.Serializer;
 
 public class GsonSerializer implements Serializer {
 

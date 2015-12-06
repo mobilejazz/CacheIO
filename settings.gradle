@@ -1,1 +1,1 @@
-include ':sample', ':library'
+include ':sample', ':cacheio-core', ':cacheio-serializers:cacheio-gson-serializer', ':cacheio-persistors:cacheio-sqlbrite-persistor'

@@ -1,4 +1,4 @@
-package com.mobilejazz.cacheio;
+package com.mobilejazz.cacheio.persistence;
 
 import com.mobilejazz.cacheio.exceptions.CacheErrorException;
 import com.mobilejazz.cacheio.exceptions.CacheNotFoundException;
