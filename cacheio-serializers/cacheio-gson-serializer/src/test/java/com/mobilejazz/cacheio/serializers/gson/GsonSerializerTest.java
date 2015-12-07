@@ -1,25 +1,31 @@
-package com.mobilejazz.cacheio.serializer;
+package com.mobilejazz.cacheio.serializers.gson;
 
 import com.google.gson.Gson;
-import com.mobilejazz.cacheio.ApplicationTestCase;
-import com.mobilejazz.cacheio.model.UserTestModel;
+import com.mobilejazz.cacheio.BuildConfig;
+import com.mobilejazz.cacheio.serializer.Serializer;
+import com.mobilejazz.cacheio.serializers.gson.model.UserTestModel;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
-public class GsonSerializerTest extends ApplicationTestCase {
+@RunWith(RobolectricTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
+public class GsonSerializerTest {
 
-  private Serializer serialiser;
+  private Serializer serializer;
 
   @Before public void setUp() throws Exception {
     Gson gson = new Gson();
-    serialiser = new GsonSerializer(gson);
+    serializer = new GsonSerializer(gson);
   }
 
   @Test public void shouldSerialiseAObject() throws Exception {
     UserTestModel userTestModel = fakeUserTestObject();
 
-    byte[] bytes = serialiser.toBytes(userTestModel);
+    byte[] bytes = serializer.toBytes(userTestModel);
 
     Assertions.assertThat(bytes).isNotNull();
     Assertions.assertThat(bytes.length).isGreaterThan(0);
@@ -30,7 +36,7 @@ public class GsonSerializerTest extends ApplicationTestCase {
     byte[] userDeserialized = fakeUserTestBytes(userTestModelToDeserialize);
 
     UserTestModel userTestModelExpected =
-        serialiser.fromBytes(userDeserialized, UserTestModel.class);
+        serializer.fromBytes(userDeserialized, UserTestModel.class);
 
     Assertions.assertThat(userTestModelExpected).isNotNull();
     Assertions.assertThat(userTestModelExpected.getId())
@@ -48,6 +54,6 @@ public class GsonSerializerTest extends ApplicationTestCase {
   }
 
   private byte[] fakeUserTestBytes(UserTestModel userTestModel) {
-    return serialiser.toBytes(userTestModel);
+    return serializer.toBytes(userTestModel);
   }
 }

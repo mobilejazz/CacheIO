@@ -1,4 +1,4 @@
-package com.mobilejazz.cacheio.model;
+package com.mobilejazz.cacheio.serializers.gson.model;
 
 public class UserTestModel {
 

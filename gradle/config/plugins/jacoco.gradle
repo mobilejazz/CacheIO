@@ -1,0 +1,17 @@
+// ---------------------------
+// Jacoco Plugin Configuration
+// ---------------------------
+
+//apply plugin: 'jacoco'
+
+//jacoco {
+//  toolVersion = '0.7.5.201505241946'
+//}
+
+//jacocoCoverage {
+//  fileThreshold 0.8 // 80% of code coverage, yup!
+//}
+
+//jacocoFull {
+//  excludeProject ":my-sub-project", ":buildSrc"
+//}
