@@ -1,4 +1,4 @@
-package com.mobilejazz.cacheio.persistence;
+package com.mobilejazz.cacheio.persistors.sqlbrite;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -8,6 +8,7 @@ import com.mobilejazz.cacheio.exceptions.ExpiredCacheException;
 import com.mobilejazz.cacheio.manager.entity.StoreObject;
 import com.mobilejazz.cacheio.manager.entity.StoreObjectBuilder;
 import com.mobilejazz.cacheio.manager.table.CacheTableMeta;
+import com.mobilejazz.cacheio.persistence.Persistence;
 import com.mobilejazz.cacheio.strategy.CachingStrategy;
 import com.mobilejazz.cacheio.strategy.CachingStrategyObject;
 import com.squareup.sqlbrite.BriteDatabase;
