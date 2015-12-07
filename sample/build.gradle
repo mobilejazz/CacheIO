@@ -24,4 +24,8 @@ dependencies {
   compile 'com.android.support:appcompat-v7:23.0.1'
 
   compile project(':cacheio-core')
+  compile project(':cacheio-serializers:cacheio-gson-serializer')
+  compile project(':cacheio-persistors:cacheio-sqlbrite-persistor')
+
+  compile 'com.google.code.gson:gson:2.4'
 }
