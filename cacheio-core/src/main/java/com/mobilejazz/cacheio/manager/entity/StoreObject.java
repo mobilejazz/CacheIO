@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.mobilejazz.cacheio.manager.table.CacheTableMeta;
 import com.mobilejazz.cacheio.strategy.timestamp.TimestampCachingObject;
+import java.util.Arrays;
 
 public class StoreObject implements TimestampCachingObject {
 
@@ -91,5 +92,17 @@ public class StoreObject implements TimestampCachingObject {
     contentValues.put(CacheTableMeta.COLUMN_TIMESTAMP, storeObject.getTimestamp());
 
     return contentValues;
+  }
+
+  @Override public String toString() {
+    return "StoreObject{" +
+        "key='" + key + '\'' +
+        ", type='" + type + '\'' +
+        ", value=" + Arrays.toString(value) +
+        ", expiryMillis=" + expiryMillis +
+        ", index='" + index + '\'' +
+        ", metaType='" + metaType + '\'' +
+        ", timestamp=" + timestamp +
+        '}';
   }
 }

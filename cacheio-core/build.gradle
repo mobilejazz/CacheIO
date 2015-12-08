@@ -54,6 +54,8 @@ dependencies {
   compile "com.android.support:appcompat-v7:${v.supportLibrariesVersion}"
   compile "com.android.support:support-annotations:${v.supportLibrariesVersion}"
 
+  compile 'com.squareup.sqlbrite:sqlbrite:0.3.1'
+
   testCompile "junit:junit:${v.junitVersion}"
   testCompile "org.assertj:assertj-core:${v.assertJVersion}"
   testCompile "org.mockito:mockito-core:${v.mockitoVersion}"

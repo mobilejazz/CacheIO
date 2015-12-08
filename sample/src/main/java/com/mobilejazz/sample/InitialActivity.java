@@ -5,14 +5,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import com.mobilejazz.cacheio.Cache;
 import com.mobilejazz.cacheio.CacheIO;
-import com.mobilejazz.cacheio.manager.CacheOpenHelper;
+import com.mobilejazz.cacheio.logging.LogLevel;
 import com.mobilejazz.cacheio.manager.entity.CacheEntry;
-import com.mobilejazz.cacheio.persistors.sqlbrite.PersistenceSqlLite;
 import com.mobilejazz.cacheio.serializers.gson.GsonSerializer;
 import com.mobilejazz.sample.gson.GsonFactory;
 import com.mobilejazz.sample.model.User;
-import com.squareup.sqlbrite.BriteDatabase;
-import com.squareup.sqlbrite.SqlBrite;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,24 +21,11 @@ public class InitialActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_initial);
 
-    SqlBrite sqlBrite = SqlBrite.create();
-    BriteDatabase briteDatabase = sqlBrite.wrapDatabaseHelper(
-        new CacheOpenHelper(getApplicationContext(), "test"));
-
-
-    /*CacheIO cacheIO = CacheIO.with(getApplicationContext())
-        .addLogging(true)
-        .addDbName("cache.http")
-        .addGson(GsonFactory.create())
-        .build();*/
-
-
-
     CacheIO cacheIO = CacheIO.with(getApplicationContext())
-        .persistence(new PersistenceSqlLite(briteDatabase))
+        .identifier("cacheio-test")
+        .logLevel(LogLevel.FULL)
         .serializer(new GsonSerializer(GsonFactory.create()))
         .build();
-
 
     Cache cache = cacheIO.cacheDataSource();
 

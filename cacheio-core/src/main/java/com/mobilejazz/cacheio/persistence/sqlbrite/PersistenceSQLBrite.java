@@ -1,10 +1,12 @@
-package com.mobilejazz.cacheio.persistors.sqlbrite;
+package com.mobilejazz.cacheio.persistence.sqlbrite;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import com.mobilejazz.cacheio.exceptions.CacheErrorException;
 import com.mobilejazz.cacheio.exceptions.CacheNotFoundException;
 import com.mobilejazz.cacheio.exceptions.ExpiredCacheException;
+import com.mobilejazz.cacheio.manager.CacheOpenHelper;
 import com.mobilejazz.cacheio.manager.entity.StoreObject;
 import com.mobilejazz.cacheio.manager.entity.StoreObjectBuilder;
 import com.mobilejazz.cacheio.manager.table.CacheTableMeta;
@@ -12,15 +14,22 @@ import com.mobilejazz.cacheio.persistence.Persistence;
 import com.mobilejazz.cacheio.strategy.CachingStrategy;
 import com.mobilejazz.cacheio.strategy.CachingStrategyObject;
 import com.squareup.sqlbrite.BriteDatabase;
+import com.squareup.sqlbrite.SqlBrite;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PersistenceSqlLite implements Persistence {
+public class PersistenceSQLBrite implements Persistence {
 
   private BriteDatabase db;
 
-  public PersistenceSqlLite(BriteDatabase briteDatabase) {
+  public PersistenceSQLBrite(BriteDatabase briteDatabase) {
     this.db = briteDatabase;
+  }
+
+  public static BriteDatabase generate(Context context, String databaseName) {
+    SqlBrite sqlBrite = SqlBrite.create();
+    return sqlBrite.wrapDatabaseHelper(
+        new CacheOpenHelper(context.getApplicationContext(), databaseName));
   }
 
   @Override public List<StoreObject> obtain(String key)
@@ -90,8 +99,7 @@ public class PersistenceSqlLite implements Persistence {
             storeObjectToPersist.getKey());
         long result = db.insert(CacheTableMeta.TABLE, contentValues);
 
-        @SuppressWarnings("unused")
-        boolean isPersisted = result > 0;
+        @SuppressWarnings("unused") boolean isPersisted = result > 0;
 
         return isPersisted;
       } else {
@@ -139,8 +147,7 @@ public class PersistenceSqlLite implements Persistence {
     try {
       long rowsAffected = db.delete(CacheTableMeta.TABLE, CacheTableMeta.COLUMN_KEY + " = ?", key);
 
-      @SuppressWarnings("unused")
-      boolean isDeleted = rowsAffected > 0;
+      @SuppressWarnings("unused") boolean isDeleted = rowsAffected > 0;
 
       return isDeleted;
     } catch (Exception e) {

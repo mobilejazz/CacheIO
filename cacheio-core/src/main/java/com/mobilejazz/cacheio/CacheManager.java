@@ -6,6 +6,8 @@ import com.mobilejazz.cacheio.detector.storeobject.TypeDetectorFactory;
 import com.mobilejazz.cacheio.detector.storeobject.TypeValueStrategy;
 import com.mobilejazz.cacheio.exceptions.CacheErrorException;
 import com.mobilejazz.cacheio.exceptions.CacheNotFoundException;
+import com.mobilejazz.cacheio.logging.LogLevel;
+import com.mobilejazz.cacheio.logging.Logger;
 import com.mobilejazz.cacheio.manager.entity.CacheEntry;
 import com.mobilejazz.cacheio.manager.entity.StoreObject;
 import com.mobilejazz.cacheio.persistence.Persistence;
@@ -14,18 +16,29 @@ import java.util.List;
 
 public class CacheManager implements Cache {
 
+  private static final String TAG = "CacheIO";
+
   private final Persistence persistence;
   private final Serializer serializer;
+  private final Logger logger;
+  private final LogLevel logLevel;
 
-  public CacheManager(Persistence persistence, Serializer serializer) {
+  public CacheManager(Persistence persistence, Serializer serializer, Logger logger,
+      LogLevel logLevel) {
     this.persistence = persistence;
     this.serializer = serializer;
+    this.logger = logger;
+    this.logLevel = logLevel;
   }
 
   @SuppressWarnings("unchecked") @Override public <T> CacheEntry<T> obtain(String key) {
     try {
       List<StoreObject> storeObjects = persistence.obtain(key);
       CacheValueStrategy strategy = CacheEntryDetectorFactory.obtain(storeObjects);
+
+      if (logLevel == LogLevel.FULL) {
+        logger.d(TAG, storeObjects.toString());
+      }
 
       return strategy.convert(serializer, storeObjects);
     } catch (CacheNotFoundException e) {
@@ -44,6 +57,11 @@ public class CacheManager implements Cache {
 
     List<StoreObject> storeObjects = strategy.convert(serializer, cacheEntry);
     try {
+
+      if (logLevel == LogLevel.FULL) {
+        logger.d(TAG, storeObjects.toString());
+      }
+
       return persistence.persist(storeObjects);
     } catch (CacheErrorException e) {
       e.printStackTrace();
@@ -53,6 +71,11 @@ public class CacheManager implements Cache {
 
   @Override public boolean delete(String key) {
     try {
+
+      if (logLevel == LogLevel.FULL) {
+        logger.d(TAG, "Delete object by key: " + key);
+      }
+
       return persistence.delete(key);
     } catch (CacheErrorException e) {
       e.printStackTrace();

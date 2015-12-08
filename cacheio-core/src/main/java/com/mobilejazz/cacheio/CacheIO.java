@@ -1,20 +1,22 @@
 package com.mobilejazz.cacheio;
 
 import android.content.Context;
+import android.text.TextUtils;
 import com.mobilejazz.cacheio.internal.helper.Preconditions;
-import com.mobilejazz.cacheio.logging.EmptyLogger;
+import com.mobilejazz.cacheio.logging.AndroidLogger;
+import com.mobilejazz.cacheio.logging.LogLevel;
 import com.mobilejazz.cacheio.logging.Logger;
 import com.mobilejazz.cacheio.persistence.Persistence;
+import com.mobilejazz.cacheio.persistence.sqlbrite.PersistenceSQLBrite;
 import com.mobilejazz.cacheio.serializer.Serializer;
 
 public class CacheIO {
 
   private final Cache cache;
-  private final Logger logger;
 
-  private CacheIO(Persistence persistence, Serializer serializer, Logger logger) {
-    this.cache = new CacheManager(persistence, serializer);
-    this.logger = logger;
+  private CacheIO(Persistence persistence, Serializer serializer, Logger logger,
+      LogLevel logLevel) {
+    this.cache = new CacheManager(persistence, serializer, logger, logLevel);
   }
 
   public Cache cacheDataSource() {
@@ -28,13 +30,15 @@ public class CacheIO {
 
   public static final class Builder {
 
-    private Context context;
     private Persistence persistence;
     private Serializer serializer;
     private Logger logger;
+    private LogLevel logLevel;
+    private String identifier;
+    private Context context;
 
     public Builder(Context context) {
-      this.context = context.getApplicationContext();
+      this.context = context;
     }
 
     public Builder serializer(Serializer serializer) {
@@ -42,19 +46,23 @@ public class CacheIO {
       return this;
     }
 
-    public Builder persistence(Persistence persistence) {
-      this.persistence = Preconditions.checkNotNull(persistence, "persistence == null");
+    public Builder identifier(String identifier) {
+      if (TextUtils.isEmpty(identifier)) {
+        throw new IllegalArgumentException("identifier == null OR database == empty");
+      }
+
+      this.identifier = identifier;
       return this;
     }
 
-    public Builder logger(Logger logger) {
-      this.logger = Preconditions.checkNotNull(logger, "logger == null");
+    public Builder logLevel(LogLevel logLevel) {
+      this.logLevel = Preconditions.checkNotNull(logLevel, "LogLevel logLevel");
       return this;
     }
 
     public CacheIO build() {
       if (persistence == null) {
-        throw new IllegalStateException("peristence == null");
+        persistence = new PersistenceSQLBrite(PersistenceSQLBrite.generate(context, identifier));
       }
 
       if (serializer == null) {
@@ -62,10 +70,10 @@ public class CacheIO {
       }
 
       if (logger == null) {
-        this.logger = new EmptyLogger();
+        this.logger = new AndroidLogger();
       }
 
-      return new CacheIO(persistence, serializer, logger);
+      return new CacheIO(persistence, serializer, logger, logLevel);
     }
   }
 }
