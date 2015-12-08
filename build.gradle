@@ -17,5 +17,3 @@ allprojects {
     jcenter()
   }
 }
-
-apply from: 'gradle/config/plugins/jacoco.gradle'
