@@ -23,7 +23,7 @@ release.properties
 # Eclipse project files
 .classpath
 .project
-.metadata
+.metaType
 .settings
 
 # Intellij
