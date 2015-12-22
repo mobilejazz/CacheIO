@@ -1,0 +1,17 @@
+ext {
+  // Android related dependencies
+  compileSdkVersion = 23
+  buildToolsVersion = '22.0.1'
+  minSdkVersion = 14
+  targetSdkVersion = 23
+
+  supportLibrariesVersion = '23.1.1'
+
+  // Libraries dependencies
+
+  // Testing
+  junitVersion = '4.12'
+  assertJVersion = '1.7.1'
+  mockitoVersion = '1.9.5'
+  robolectricVersion = '3.0'
+}

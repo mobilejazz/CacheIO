@@ -1,0 +1,12 @@
+check.dependsOn 'lint'
+
+android {
+  lintOptions {
+    abortOnError true
+    xmlReport false
+    htmlReport true
+    lintConfig file("${project.rootDir}/gradle/assets/lint/lint.xml")
+    htmlOutput file("$project.buildDir/reports/lint/result.html")
+    xmlOutput file("$project.buildDir/reports/lint/result.xml")
+  }
+}
