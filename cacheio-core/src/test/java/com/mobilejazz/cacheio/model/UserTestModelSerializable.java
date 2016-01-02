@@ -2,7 +2,7 @@ package com.mobilejazz.cacheio.model;
 
 import java.io.Serializable;
 
-public class UserTestModelSerializable implements Serializable {
+public class UserTestModelSerializable extends UserTestModel implements Serializable {
 
   private int id;
   private String name;
