@@ -27,11 +27,11 @@ public interface TypeValueStrategy {
 
   class NullTypeValueStrategy implements TypeValueStrategy {
 
-    @Override @NonNull public List<StoreObject> convert(Serializer serializer, CacheEntry cacheEntry) {
+    @Override @NonNull public List<StoreObject> convert(Serializer serializer, CacheEntry<?> cacheEntry) {
       return Collections.emptyList();
     }
   }
 
-  List<StoreObject> convert(Serializer serializer, CacheEntry cacheEntry);
+  List<StoreObject> convert(Serializer serializer, CacheEntry<?> cacheEntry);
 
 }
