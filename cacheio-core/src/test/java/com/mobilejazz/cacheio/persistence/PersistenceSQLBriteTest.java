@@ -18,6 +18,7 @@ package com.mobilejazz.cacheio.persistence;
 
 import android.database.Cursor;
 import com.mobilejazz.cacheio.ApplicationTestCase;
+import com.mobilejazz.cacheio.exceptions.CacheNotFoundException;
 import com.mobilejazz.cacheio.manager.entity.StoreObject;
 import com.mobilejazz.cacheio.persistence.sqlbrite.PersistenceSQLBrite;
 import com.squareup.sqlbrite.BriteDatabase;
@@ -70,7 +71,67 @@ public class PersistenceSQLBriteTest extends ApplicationTestCase {
 
     List<StoreObject> storeObjects = persistence.obtain(FAKE_KEY);
 
-    // Then
+    // Them
     Assertions.assertThat(storeObjects).hasSize(1);
+  }
+
+  @Test public void shouldReturnMoreThanOneStoreObject() throws Exception {
+    // Given
+    Cursor cursor = mock(Cursor.class);
+    when(cursor.getString(anyInt())).thenReturn(FAKE_KEY, FAKE_TYPE, FAKE_METATYPE, FAKE_INDEX);
+    when(cursor.getBlob(anyInt())).thenReturn(FAKE_VALUE);
+    when(cursor.getLong(anyInt())).thenReturn(FAKE_EXPIRY_MILLIS, FAKE_TIMESTAMP);
+    when(cursor.getCount()).thenReturn(2);
+    when(cursor.moveToNext()).thenReturn(true/*first interaction*/, true /*second interaction*/,
+        false /*third interaction*/);
+
+    // When
+    when(briteDatabase.query(anyString(), anyString())).thenReturn(cursor);
+
+    List<StoreObject> storeObjects = persistence.obtain(FAKE_KEY);
+
+    // Them
+    Assertions.assertThat(storeObjects.size()).isGreaterThan(1);
+  }
+
+  @Test(expected = CacheNotFoundException.class) public void shouldThrowCacheNotFoundException()
+      throws Exception {
+    // Given
+    Cursor cursor = mock(Cursor.class);
+    when(cursor.getString(anyInt())).thenReturn(FAKE_KEY, FAKE_TYPE, FAKE_METATYPE, FAKE_INDEX);
+    when(cursor.getBlob(anyInt())).thenReturn(FAKE_VALUE);
+    when(cursor.getLong(anyInt())).thenReturn(FAKE_EXPIRY_MILLIS, FAKE_TIMESTAMP);
+    when(cursor.getCount()).thenReturn(0);
+    when(cursor.moveToNext()).thenReturn(false);
+
+    // When
+    when(briteDatabase.query(anyString(), anyString())).thenReturn(cursor);
+
+    persistence.obtain(FAKE_KEY);
+  }
+
+  @Test public void shouldReturnAStoreObjectProperlyMapped() throws Exception {
+    // Given
+    Cursor cursor = mock(Cursor.class);
+    when(cursor.getString(anyInt())).thenReturn(FAKE_KEY, FAKE_TYPE, FAKE_METATYPE, FAKE_INDEX);
+    when(cursor.getBlob(anyInt())).thenReturn(FAKE_VALUE);
+    when(cursor.getLong(anyInt())).thenReturn(FAKE_EXPIRY_MILLIS, FAKE_TIMESTAMP);
+    when(cursor.getCount()).thenReturn(1);
+    when(cursor.moveToNext()).thenReturn(true/*first interaction*/, false /*second interaction*/);
+
+    // When
+    when(briteDatabase.query(anyString(), anyString())).thenReturn(cursor);
+
+    List<StoreObject> storeObjects = persistence.obtain(FAKE_KEY);
+    StoreObject storeObjectExpected = storeObjects.get(0);
+
+    // Them
+    Assertions.assertThat(storeObjectExpected.getKey()).isEqualTo(FAKE_KEY);
+    Assertions.assertThat(storeObjectExpected.getExpiredMillis()).isEqualTo(FAKE_EXPIRY_MILLIS);
+    Assertions.assertThat(storeObjectExpected.getValue()).isEqualTo(FAKE_VALUE);
+    Assertions.assertThat(storeObjectExpected.getType()).isEqualTo(FAKE_TYPE);
+    Assertions.assertThat(storeObjectExpected.getMetaType()).isEqualTo(FAKE_METATYPE);
+    Assertions.assertThat(storeObjectExpected.getTimestamp()).isEqualTo(FAKE_TIMESTAMP);
+    Assertions.assertThat(storeObjectExpected.getIndex()).isEqualTo(FAKE_INDEX);
   }
 }
