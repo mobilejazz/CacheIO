@@ -61,16 +61,15 @@ public class ObjectTypeValueStrategyTest extends ApplicationTestCase {
 
     Class<?> classType = Class.forName(storeObjectExpected.getType());
 
-    UserTestModelSerializable valueExpected =
-        (UserTestModelSerializable) serializer.fromBytes(storeObjectExpected.getValue(), classType);
-
     // Then
     Assertions.assertThat(storeObjectExpected.getKey()).isSameAs(cacheEntry.getKey());
     Assertions.assertThat(storeObjectExpected.getType())
         .isSameAs(UserTestModelSerializable.class.getCanonicalName());
     Assertions.assertThat(storeObjectExpected.getExpiredMillis()).isEqualTo(1000);
-    Assertions.assertThat(valueExpected.getId()).isEqualTo(userTestModel.getId());
-    Assertions.assertThat(valueExpected.getName()).isEqualTo(userTestModel.getName());
+    Assertions.assertThat(storeObjectExpected.getIndex()).isNotNull();
+    Assertions.assertThat(storeObjectExpected.getIndex()).isNotEmpty();
+    Assertions.assertThat(storeObjectExpected.getValue()).isNotNull();
+    Assertions.assertThat(storeObjectExpected.getValue()).isNotEmpty();
   }
 
   private UserTestModelSerializable fakeUserTestModel() {
