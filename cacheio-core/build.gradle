@@ -33,6 +33,10 @@ android {
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
   }
+
+  testOptions {
+    unitTests.returnDefaultValues = false
+  }
 }
 
 advancedVersioning {
@@ -60,4 +64,9 @@ dependencies {
   testCompile "org.assertj:assertj-core:${v.assertJVersion}"
   testCompile "org.mockito:mockito-core:${v.mockitoVersion}"
   testCompile "org.robolectric:robolectric:${v.robolectricVersion}"
+
+  testCompile "org.powermock:powermock-api-mockito:${v.powerMockitoVersion}"
+  testCompile "org.powermock:powermock-module-junit4-rule-agent:${v.powerMockitoVersion}"
+  testCompile "org.powermock:powermock-module-junit4-rule:${v.powerMockitoVersion}"
+  testCompile "org.powermock:powermock-module-junit4:${v.powerMockitoVersion}"
 }
