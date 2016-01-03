@@ -18,6 +18,7 @@ package com.mobilejazz.cacheio.persistence;
 
 import android.database.Cursor;
 import com.mobilejazz.cacheio.ApplicationTestCase;
+import com.mobilejazz.cacheio.exceptions.CacheErrorException;
 import com.mobilejazz.cacheio.exceptions.CacheNotFoundException;
 import com.mobilejazz.cacheio.manager.entity.StoreObject;
 import com.mobilejazz.cacheio.persistence.sqlbrite.PersistenceSQLBrite;
@@ -133,5 +134,33 @@ public class PersistenceSQLBriteTest extends ApplicationTestCase {
     Assertions.assertThat(storeObjectExpected.getMetaType()).isEqualTo(FAKE_METATYPE);
     Assertions.assertThat(storeObjectExpected.getTimestamp()).isEqualTo(FAKE_TIMESTAMP);
     Assertions.assertThat(storeObjectExpected.getIndex()).isEqualTo(FAKE_INDEX);
+  }
+
+  @Test public void shouldNotDeleteAObjectByKey() throws Exception {
+    // When
+    when(briteDatabase.delete(anyString(), anyString(), anyString())).thenReturn(0);
+
+    boolean result = persistence.delete(FAKE_KEY);
+
+    // Then
+    Assertions.assertThat(result).isFalse();
+  }
+
+  @Test public void shouldDeleteAObjectByKey() throws Exception {
+    // When
+    when(briteDatabase.delete(anyString(), anyString(), anyString())).thenReturn(1);
+
+    boolean result = persistence.delete(FAKE_KEY);
+
+    // Then
+    Assertions.assertThat(result).isTrue();
+  }
+
+  @Test(expected = CacheErrorException.class) public void shouldThrowACacheErrorException()
+      throws Exception {
+    // When
+    when(briteDatabase.delete(anyString(), anyString(), anyString())).thenThrow(Exception.class);
+
+    persistence.delete(FAKE_KEY);
   }
 }
