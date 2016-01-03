@@ -70,6 +70,8 @@ public class ObjectTypeValueStrategyTest extends ApplicationTestCase {
     Assertions.assertThat(storeObjectExpected.getIndex()).isNotEmpty();
     Assertions.assertThat(storeObjectExpected.getValue()).isNotNull();
     Assertions.assertThat(storeObjectExpected.getValue()).isNotEmpty();
+    Assertions.assertThat(storeObjectExpected.getMetaType()).isNotNull();
+    Assertions.assertThat(storeObjectExpected.getMetaType()).isEqualTo(Object.class.getSimpleName());
   }
 
   private UserTestModelSerializable fakeUserTestModel() {
