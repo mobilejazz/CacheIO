@@ -23,7 +23,7 @@ import com.mobilejazz.cacheio.manager.entity.StoreObject;
 import com.mobilejazz.cacheio.manager.entity.StoreObjectBuilder;
 import com.mobilejazz.cacheio.model.UserTestModelSerializable;
 import com.mobilejazz.cacheio.serializer.Serializer;
-import java.util.Arrays;
+import java.util.Collections;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +46,6 @@ public class ObjectCacheValueStrategyTest extends ApplicationTestCase {
     MockitoAnnotations.initMocks(this);
 
     valueStrategyToTest = new ObjectCacheValueStrategy();
-    //serializer = new JavaSerializer();
   }
 
   @Test public void shouldReturnACacheEntryProperlyConverted() throws Exception {
@@ -65,20 +64,12 @@ public class ObjectCacheValueStrategyTest extends ApplicationTestCase {
 
     // When
     CacheEntry<Object> cacheEntryExpected =
-        valueStrategyToTest.convert(serializer, Arrays.asList(storeObject));
+        valueStrategyToTest.convert(serializer, Collections.singletonList(storeObject));
 
     // Then
     Assertions.assertThat(cacheEntryExpected.getKey()).isEqualTo(storeObject.getKey());
     Assertions.assertThat(cacheEntryExpected.getValue()).isNotNull();
     Assertions.assertThat(cacheEntryExpected.getExpiryMillis()).isEqualTo(FAKE_EXPIRY_MILLIS);
     Assertions.assertThat(cacheEntryExpected.getType()).isSameAs(UserTestModelSerializable.class);
-  }
-
-  private UserTestModelSerializable fakeUserTestModel() {
-    UserTestModelSerializable userTestModel = new UserTestModelSerializable();
-    userTestModel.setId(1);
-    userTestModel.setName("Jose Luis Franconetti");
-
-    return userTestModel;
   }
 }

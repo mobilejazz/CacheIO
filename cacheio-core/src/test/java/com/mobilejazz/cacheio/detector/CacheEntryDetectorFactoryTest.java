@@ -24,6 +24,7 @@ import com.mobilejazz.cacheio.detector.cacheentry.ObjectCacheValueStrategy;
 import com.mobilejazz.cacheio.manager.entity.StoreObject;
 import com.mobilejazz.cacheio.manager.entity.StoreObjectBuilder;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
@@ -49,7 +50,7 @@ public class CacheEntryDetectorFactoryTest extends ApplicationTestCase {
   @Test public void shouldReturnAObjectCacheValueStrategy() throws Exception {
     StoreObject storeObject = new StoreObjectBuilder().setMetaType(Object.class.getSimpleName()).build();
 
-    List<StoreObject> storeObjects = Arrays.asList(storeObject);
+    List<StoreObject> storeObjects = Collections.singletonList(storeObject);
 
     CacheValueStrategy cacheValueStrategy = CacheEntryDetectorFactory.obtain(storeObjects);
 
@@ -59,7 +60,7 @@ public class CacheEntryDetectorFactoryTest extends ApplicationTestCase {
   @Test public void shouldReturnANullCacheValueStrategy() throws Exception {
     StoreObject storeObject = new StoreObjectBuilder().setMetaType(null).build();
 
-    List<StoreObject> storeObjects = Arrays.asList(storeObject);
+    List<StoreObject> storeObjects = Collections.singletonList(storeObject);
 
     CacheValueStrategy cacheValueStrategy = CacheEntryDetectorFactory.obtain(storeObjects);
 
