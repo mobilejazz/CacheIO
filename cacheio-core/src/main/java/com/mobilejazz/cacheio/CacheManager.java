@@ -64,7 +64,7 @@ public class CacheManager implements Cache {
     }
   }
 
-  @Override public boolean persist(CacheEntry cacheEntry) {
+  @Override public <T> boolean persist(CacheEntry<T> cacheEntry) throws CacheErrorException {
     if (cacheEntry == null) {
       throw new IllegalArgumentException("cacheEntry == null");
     }

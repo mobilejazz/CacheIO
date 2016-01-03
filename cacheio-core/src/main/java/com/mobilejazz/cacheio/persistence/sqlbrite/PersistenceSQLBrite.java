@@ -73,7 +73,7 @@ public class PersistenceSQLBrite implements Persistence {
       String index = entry.getString(indexColumn);
       long timestamp = entry.getLong(timestampColumn);
 
-      StoreObject storeObject = new StoreObjectBuilder().setIndex(keyValue)
+      StoreObject storeObject = new StoreObjectBuilder().setKey(keyValue)
           .setType(type)
           .setValue(value)
           .setExpiryMillis(expiryMillis)
@@ -103,7 +103,8 @@ public class PersistenceSQLBrite implements Persistence {
         throw new IllegalArgumentException("value.size() == 0");
       }
 
-      boolean isSingleStoreObject = value.size() == 1 && value.get(0).getMetaType() == null;
+      boolean isSingleStoreObject =
+          value.size() == 1 && value.get(0).getMetaType().equals(Object.class.getSimpleName());
 
       if (isSingleStoreObject) {
         // Single object
