@@ -103,7 +103,8 @@ public class PersistenceSQLBrite implements Persistence {
         throw new IllegalArgumentException("value.size() == 0");
       }
 
-      boolean isSingleStoreObject = value.size() == 1 && value.get(0).getMetaType() == null;
+      boolean isSingleStoreObject =
+          value.size() == 1 && value.get(0).getMetaType().equals(Object.class.getSimpleName());
 
       if (isSingleStoreObject) {
         // Single object
