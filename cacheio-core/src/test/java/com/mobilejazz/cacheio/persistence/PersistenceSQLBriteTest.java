@@ -14,11 +14,11 @@
  *  limitations under the License.
  */
 
-package com.mobilejazz.cacheio;
+package com.mobilejazz.cacheio.persistence;
 
 import android.database.Cursor;
+import com.mobilejazz.cacheio.ApplicationTestCase;
 import com.mobilejazz.cacheio.manager.entity.StoreObject;
-import com.mobilejazz.cacheio.persistence.Persistence;
 import com.mobilejazz.cacheio.persistence.sqlbrite.PersistenceSQLBrite;
 import com.squareup.sqlbrite.BriteDatabase;
 import java.util.List;
