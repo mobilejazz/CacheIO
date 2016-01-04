@@ -23,6 +23,7 @@ import com.mobilejazz.cacheio.exceptions.CacheNotFoundException;
 import com.mobilejazz.cacheio.manager.entity.StoreObject;
 import com.mobilejazz.cacheio.persistence.sqlbrite.PersistenceSQLBrite;
 import com.squareup.sqlbrite.BriteDatabase;
+import java.util.ArrayList;
 import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
@@ -162,5 +163,24 @@ public class PersistenceSQLBriteTest extends ApplicationTestCase {
     when(briteDatabase.delete(anyString(), anyString(), anyString())).thenThrow(Exception.class);
 
     persistence.delete(FAKE_KEY);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowAExceptionWhenPersistAndStoreObjectsAreNull() throws Exception {
+    // When
+    persistence.persist(null);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowAExceptionWhenPersistAndListStoreObjectsSizeIsZero() throws Exception {
+    // Given
+    List<StoreObject> storeObjects = new ArrayList<>();
+
+    // When
+    persistence.persist(storeObjects);
+  }
+
+  @Test public void shouldPersistASingleStoreObject() throws Exception {
+    //
   }
 }

@@ -93,16 +93,15 @@ public class PersistenceSQLBrite implements Persistence {
   }
 
   @Override public boolean persist(List<StoreObject> value) throws CacheErrorException {
+    if (value == null) {
+      throw new IllegalArgumentException("value == null");
+    }
+
+    if (value.size() == 0) {
+      throw new IllegalArgumentException("value.size() == 0");
+    }
+
     try {
-
-      if (value == null) {
-        throw new IllegalArgumentException("value == null");
-      }
-
-      if (value.size() == 0) {
-        throw new IllegalArgumentException("value.size() == 0");
-      }
-
       boolean isSingleStoreObject =
           value.size() == 1 && value.get(0).getMetaType().equals(Object.class.getSimpleName());
 
