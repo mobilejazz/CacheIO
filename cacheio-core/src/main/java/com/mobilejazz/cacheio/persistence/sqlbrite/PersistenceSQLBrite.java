@@ -121,14 +121,18 @@ public class PersistenceSQLBrite implements Persistence {
             index);
       }
 
+      List<Long> tempSuccessInsertTransactions = new ArrayList<>(value.size());
+
       // Insert new objects
       for (StoreObject storeObject : value) {
-        db.insert(CacheTableMeta.TABLE, StoreObject.toContentValues(storeObject));
+        long result = db.insert(CacheTableMeta.TABLE, StoreObject.toContentValues(storeObject));
+        tempSuccessInsertTransactions.add(result);
       }
 
       transaction.markSuccessful();
       transaction.end();
-      return true;
+
+      return !tempSuccessInsertTransactions.contains(Long.valueOf(-1));
     } catch (Exception e) {
       throw new CacheErrorException(e);
     }
