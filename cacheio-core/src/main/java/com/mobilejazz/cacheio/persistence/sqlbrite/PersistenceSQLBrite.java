@@ -103,23 +103,11 @@ public class PersistenceSQLBrite implements Persistence {
     try {
       BriteDatabase.Transaction transaction = db.newTransaction();
 
-      String key = value.get(0).getKey();
-
-      // Get all the objects associated with the key to know if we need to delete all this objects
-      // for cleaning purposes
-      Cursor query = db.query(
-          "SELECT * FROM " + CacheTableMeta.TABLE + " WHERE " + CacheTableMeta.COLUMN_KEY + " = ?",
-          key);
+      StoreObject firstStoreObject = value.get(0);
+      String key = firstStoreObject.getKey();
 
       // Clean all the old objects
-      while (query.moveToNext()) {
-        int columnIndex = query.getColumnIndex(CacheTableMeta.COLUMN_INDEX);
-        String index = query.getString(columnIndex);
-
-        db.delete(CacheTableMeta.TABLE,
-            CacheTableMeta.COLUMN_KEY + " = ? AND " + CacheTableMeta.COLUMN_INDEX + " = ?", key,
-            index);
-      }
+      delete(key);
 
       List<Long> tempSuccessInsertTransactions = new ArrayList<>(value.size());
 

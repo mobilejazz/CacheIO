@@ -312,6 +312,31 @@ public class PersistenceSQLBriteTest extends ApplicationTestCase {
     verify(briteDatabase, times(2)).insert(anyString(), any(ContentValues.class));
   }
 
+  @Test public void shouldDeleteOneStoreObjectBeforeInsertIt() throws Exception {
+    // Given
+    List<StoreObject> storeObjects = new ArrayList<>();
+    StoreObject storeObject = provideAFakeStoreObject();
+    storeObjects.add(storeObject);
+    storeObjects.add(storeObject);
+
+    // Cursor mock
+    Cursor cursor = mock(Cursor.class);
+    when(cursor.getCount()).thenReturn(2);
+    when(cursor.moveToNext()).thenReturn(true /*first interaction*/, false /*second interaction*/);
+
+    // ContentValues Mock
+    ContentValues contentValues = PowerMockito.mock(ContentValues.class);
+
+    PowerMockito.mockStatic(StoreObject.class);
+    PowerMockito.when(StoreObject.toContentValues(storeObject)).thenReturn(contentValues);
+
+    // When
+    when(briteDatabase.query(anyString(), anyString())).thenReturn(cursor);
+    //when()
+
+
+  }
+
   private StoreObject provideAFakeStoreObject() {
     return new StoreObjectBuilder().setKey(FAKE_KEY)
         .setIndex(FAKE_INDEX)
