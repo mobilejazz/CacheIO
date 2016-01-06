@@ -51,12 +51,7 @@ public class StoreObject implements TimestampCachingObject {
     this.index = index;
     this.metaType = metaType;
     this.timestamp = timestamp;
-
-    if (index == null) {
-      this.index = key;
-    } else {
-      this.index = index;
-    }
+    this.index = index;
   }
 
   @Nullable public String getKey() {

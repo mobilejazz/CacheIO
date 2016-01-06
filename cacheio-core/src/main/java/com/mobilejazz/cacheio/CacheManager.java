@@ -22,6 +22,7 @@ import com.mobilejazz.cacheio.detector.storeobject.TypeDetectorFactory;
 import com.mobilejazz.cacheio.detector.storeobject.TypeValueStrategy;
 import com.mobilejazz.cacheio.exceptions.CacheErrorException;
 import com.mobilejazz.cacheio.exceptions.CacheNotFoundException;
+import com.mobilejazz.cacheio.exceptions.ExpiredCacheException;
 import com.mobilejazz.cacheio.logging.LogLevel;
 import com.mobilejazz.cacheio.logging.Logger;
 import com.mobilejazz.cacheio.manager.entity.CacheEntry;
@@ -47,24 +48,19 @@ public class CacheManager implements Cache {
     this.logLevel = logLevel;
   }
 
-  @SuppressWarnings("unchecked") @Override public <T> CacheEntry<T> obtain(String key) {
-    try {
-      List<StoreObject> storeObjects = persistence.obtain(key);
-      CacheValueStrategy strategy = CacheEntryDetectorFactory.obtain(storeObjects);
+  @SuppressWarnings("unchecked") @Override public <T> CacheEntry<T> obtain(String key)
+      throws CacheNotFoundException, CacheErrorException, ExpiredCacheException {
+    List<StoreObject> storeObjects = persistence.obtain(key);
+    CacheValueStrategy strategy = CacheEntryDetectorFactory.obtain(storeObjects);
 
-      if (logLevel == LogLevel.FULL) {
-        logger.d(TAG, storeObjects.toString());
-      }
-
-      return strategy.convert(serializer, storeObjects);
-    } catch (CacheNotFoundException e) {
-      throw new CacheNotFoundException();
-    } catch (CacheErrorException e) {
-      throw new CacheErrorException(e);
+    if (logLevel == LogLevel.FULL) {
+      logger.d(TAG, storeObjects.toString());
     }
+
+    return strategy.convert(serializer, storeObjects);
   }
 
-  @Override public boolean persist(CacheEntry cacheEntry) {
+  @Override public <T> boolean persist(CacheEntry<T> cacheEntry) throws CacheErrorException {
     if (cacheEntry == null) {
       throw new IllegalArgumentException("cacheEntry == null");
     }

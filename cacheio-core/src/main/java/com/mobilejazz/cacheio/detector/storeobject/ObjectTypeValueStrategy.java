@@ -25,11 +25,12 @@ import java.util.List;
 
 public class ObjectTypeValueStrategy implements TypeValueStrategy {
 
-  @Override public List<StoreObject> convert(Serializer serializer, CacheEntry cacheEntry) {
+  @Override public List<StoreObject> convert(Serializer serializer, CacheEntry<?> cacheEntry) {
     byte[] bytes = serializer.toBytes(cacheEntry.getValue());
 
     StoreObject storeObject = new StoreObjectBuilder()
         .setKey(cacheEntry.getKey())
+        .setIndex(cacheEntry.getKey())
         .setType(cacheEntry.getType().getCanonicalName())
         .setValue(bytes)
         .setExpiryMillis(cacheEntry.getExpiryMillis())
