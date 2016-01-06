@@ -40,6 +40,8 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @PrepareForTest({ BriteDatabase.class, StoreObject.class }) @RunWith(PowerMockRunner.class)
@@ -213,6 +215,7 @@ public class PersistenceSQLBriteTest extends ApplicationTestCase {
     boolean result = persistence.persist(storeObjects);
 
     Assertions.assertThat(result).isTrue();
+    verify(briteDatabase, times(1)).insert(anyString(), any(ContentValues.class));
   }
 
   @Test public void shouldNotPersistASingleObject() throws Exception {
@@ -242,6 +245,7 @@ public class PersistenceSQLBriteTest extends ApplicationTestCase {
     boolean result = persistence.persist(storeObjects);
 
     Assertions.assertThat(result).isFalse();
+    verify(briteDatabase, times(1)).insert(anyString(), any(ContentValues.class));
   }
 
   @Test public void shouldPersistAListOfStoreObjects() throws Exception {
@@ -273,6 +277,7 @@ public class PersistenceSQLBriteTest extends ApplicationTestCase {
     boolean result = persistence.persist(storeObjects);
 
     Assertions.assertThat(result).isTrue();
+    verify(briteDatabase, times(2)).insert(anyString(), any(ContentValues.class));
   }
 
   @Test public void shouldNotPersistAListOfStoreObjects() throws Exception {
@@ -304,6 +309,7 @@ public class PersistenceSQLBriteTest extends ApplicationTestCase {
     boolean result = persistence.persist(storeObjects);
 
     Assertions.assertThat(result).isFalse();
+    verify(briteDatabase, times(2)).insert(anyString(), any(ContentValues.class));
   }
 
   private StoreObject provideAFakeStoreObject() {
