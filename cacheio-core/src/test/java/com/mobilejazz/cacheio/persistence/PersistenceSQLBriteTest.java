@@ -16,11 +16,13 @@
 
 package com.mobilejazz.cacheio.persistence;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import com.mobilejazz.cacheio.ApplicationTestCase;
 import com.mobilejazz.cacheio.exceptions.CacheErrorException;
 import com.mobilejazz.cacheio.exceptions.CacheNotFoundException;
 import com.mobilejazz.cacheio.manager.entity.StoreObject;
+import com.mobilejazz.cacheio.manager.entity.StoreObjectBuilder;
 import com.mobilejazz.cacheio.persistence.sqlbrite.PersistenceSQLBrite;
 import com.squareup.sqlbrite.BriteDatabase;
 import java.util.ArrayList;
@@ -33,12 +35,14 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@PrepareForTest(BriteDatabase.class) @RunWith(PowerMockRunner.class)
+@PrepareForTest({ BriteDatabase.class, StoreObject.class }) @RunWith(PowerMockRunner.class)
 public class PersistenceSQLBriteTest extends ApplicationTestCase {
 
   public static final String FAKE_KEY = "fake.key";
@@ -48,6 +52,7 @@ public class PersistenceSQLBriteTest extends ApplicationTestCase {
   public static final String FAKE_INDEX = "fake.index";
   public static final String FAKE_METATYPE = "fake.metatype";
   public static final long FAKE_TIMESTAMP = 10000;
+  public static final String FAKE_QUERY = "fake.query";
 
   private Persistence persistence;
 
@@ -181,6 +186,40 @@ public class PersistenceSQLBriteTest extends ApplicationTestCase {
   }
 
   @Test public void shouldPersistASingleStoreObject() throws Exception {
-    //
+    // Given
+    List<StoreObject> storeObjects = new ArrayList<>();
+
+    StoreObject storeObject = new StoreObjectBuilder().setKey(FAKE_KEY)
+        .setIndex(FAKE_INDEX)
+        .setValue(FAKE_VALUE)
+        .setType(FAKE_TYPE)
+        .setExpiryMillis(FAKE_EXPIRY_MILLIS)
+        .setMetaType(FAKE_METATYPE)
+        .setTimestamp(FAKE_TIMESTAMP)
+        .build();
+
+    storeObjects.add(storeObject);
+
+    // Cursor mock
+    Cursor cursor = mock(Cursor.class);
+    when(cursor.moveToNext()).thenReturn(false);
+
+    // ContentValues Mock
+    ContentValues contentValues = PowerMockito.mock(ContentValues.class);
+
+    PowerMockito.mockStatic(StoreObject.class);
+    PowerMockito.when(StoreObject.toContentValues(storeObject)).thenReturn(contentValues);
+
+    // When
+    BriteDatabase.Transaction transaction = mock(BriteDatabase.Transaction.class);
+    when(briteDatabase.newTransaction()).thenReturn(transaction);
+    doNothing().when(transaction).markSuccessful();
+    doNothing().when(transaction).end();
+    when(briteDatabase.query(anyString(), anyString())).thenReturn(cursor);
+    when(briteDatabase.insert(anyString(), any(ContentValues.class))).thenReturn((long) 23);
+
+    boolean result = persistence.persist(storeObjects);
+
+    Assertions.assertThat(result).isTrue();
   }
 }
