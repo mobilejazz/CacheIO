@@ -16,7 +16,6 @@
 
 package com.mobilejazz.cacheio.persistence.sqlbrite;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import com.mobilejazz.cacheio.exceptions.CacheErrorException;
@@ -93,68 +92,35 @@ public class PersistenceSQLBrite implements Persistence {
   }
 
   @Override public boolean persist(List<StoreObject> value) throws CacheErrorException {
+    if (value == null) {
+      throw new IllegalArgumentException("value == null");
+    }
+
+    if (value.size() == 0) {
+      throw new IllegalArgumentException("value.size() == 0");
+    }
+
     try {
+      BriteDatabase.Transaction transaction = db.newTransaction();
 
-      if (value == null) {
-        throw new IllegalArgumentException("value == null");
+      StoreObject firstStoreObject = value.get(0);
+      String key = firstStoreObject.getKey();
+
+      // Clean all the old objects
+      delete(key);
+
+      List<Long> tempSuccessInsertTransactions = new ArrayList<>(value.size());
+
+      // Insert new objects
+      for (StoreObject storeObject : value) {
+        long result = db.insert(CacheTableMeta.TABLE, StoreObject.toContentValues(storeObject));
+        tempSuccessInsertTransactions.add(result);
       }
 
-      if (value.size() == 0) {
-        throw new IllegalArgumentException("value.size() == 0");
-      }
+      transaction.markSuccessful();
+      transaction.end();
 
-      boolean isSingleStoreObject =
-          value.size() == 1 && value.get(0).getMetaType().equals(Object.class.getSimpleName());
-
-      if (isSingleStoreObject) {
-        // Single object
-        StoreObject storeObjectToPersist = value.get(0);
-
-        ContentValues contentValues = StoreObject.toContentValues(storeObjectToPersist);
-
-        db.delete(CacheTableMeta.TABLE, CacheTableMeta.COLUMN_KEY + " = ?",
-            storeObjectToPersist.getKey());
-        long result = db.insert(CacheTableMeta.TABLE, contentValues);
-
-        @SuppressWarnings("unused") boolean isPersisted = result > 0;
-
-        return isPersisted;
-      } else {
-        // List object
-
-        BriteDatabase.Transaction transaction = db.newTransaction();
-
-        String key = value.get(0).getKey();
-
-        // Get all the objects associated with the key to know if we need to delete all this objects
-        // for cleaning purposes
-        Cursor query = db.query("SELECT * FROM "
-            + CacheTableMeta.TABLE
-            + " WHERE "
-            + CacheTableMeta.COLUMN_KEY
-            + " = ?", key);
-
-        // Clean all the old objects
-        while (query.moveToNext()) {
-          int columnIndex = query.getColumnIndex(CacheTableMeta.COLUMN_INDEX);
-          String index = query.getString(columnIndex);
-
-          db.delete(CacheTableMeta.TABLE,
-              CacheTableMeta.COLUMN_KEY + " = ? AND " + CacheTableMeta.COLUMN_INDEX + " = ?", key,
-              index);
-        }
-
-        // Insert new objects
-        for (StoreObject storeObject : value) {
-          db.insert(CacheTableMeta.TABLE, StoreObject.toContentValues(storeObject));
-        }
-
-        transaction.markSuccessful();
-        transaction.end();
-
-        // TODO: 22/11/15 Fix this!!!!!!!
-        return true;
-      }
+      return !tempSuccessInsertTransactions.contains(Long.valueOf(-1));
     } catch (Exception e) {
       throw new CacheErrorException(e);
     }

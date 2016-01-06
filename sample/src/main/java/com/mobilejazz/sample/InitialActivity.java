@@ -16,6 +16,8 @@ import java.util.List;
 public class InitialActivity extends AppCompatActivity {
 
   private static final String TAG = InitialActivity.class.getSimpleName();
+  public static final String USER_KEY_LIST = "user.key.list";
+  public static final String USER_KEY_ONE = "user.key.one";
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -37,26 +39,31 @@ public class InitialActivity extends AppCompatActivity {
     userTwo.setId(2);
     userTwo.setName("Test user");
 
-    CacheEntry cacheEntryUserOne = CacheEntry.create("user.key.one", User.class, userOne, 12);
+    CacheEntry cacheEntryUserOne = CacheEntry.create(USER_KEY_ONE, User.class, userOne, 12);
+    cache.persist(cacheEntryUserOne);
+    cache.persist(cacheEntryUserOne);
     cache.persist(cacheEntryUserOne);
 
     List<User> users = new ArrayList<>();
-    //users.add(userOne);
+    users.add(userOne);
     users.add(userTwo);
 
-    CacheEntry cacheEntryUserList = CacheEntry.create("user.key.list", User.class, users, 12);
+    CacheEntry cacheEntryUserList = CacheEntry.create(USER_KEY_LIST, User.class, users, 12);
+    cache.persist(cacheEntryUserList);
+    cache.persist(cacheEntryUserList);
     cache.persist(cacheEntryUserList);
 
-    CacheEntry resultQueryUserOne = cache.obtain("user.key.one");
+    CacheEntry resultQueryUserOne = cache.obtain(USER_KEY_ONE);
 
     User resultUser = (User) resultQueryUserOne.getValue();
-    Log.d(TAG, resultUser.toString());
+    Log.d(TAG, "User One = " + resultUser.toString());
 
-    CacheEntry resultQueryUserList = cache.obtain("user.key.list");
+    CacheEntry resultQueryUserList = cache.obtain(USER_KEY_LIST);
+
 
     List<User> resultQueryListUsers = (List<User>) resultQueryUserList.getValue();
     for (User user : resultQueryListUsers) {
-      Log.d(TAG, user.toString());
+      Log.d(TAG, "List - " + user.toString());
     }
 
 /*    User userThree = new User();

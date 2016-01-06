@@ -13,5 +13,6 @@ ext {
   junitVersion = '4.12'
   assertJVersion = '1.7.1'
   mockitoVersion = '1.9.5'
+  powerMockitoVersion = '1.6.1'
   robolectricVersion = '3.0'
 }
