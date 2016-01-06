@@ -30,6 +30,7 @@ public class ObjectTypeValueStrategy implements TypeValueStrategy {
 
     StoreObject storeObject = new StoreObjectBuilder()
         .setKey(cacheEntry.getKey())
+        .setIndex(cacheEntry.getKey())
         .setType(cacheEntry.getType().getCanonicalName())
         .setValue(bytes)
         .setExpiryMillis(cacheEntry.getExpiryMillis())
