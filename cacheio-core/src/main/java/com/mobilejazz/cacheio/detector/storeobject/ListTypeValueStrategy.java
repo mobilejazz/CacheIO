@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ListTypeValueStrategy implements TypeValueStrategy {
-  @Override public List<StoreObject> convert(Serializer serializer, CacheEntry cacheEntry) {
+  @Override public List<StoreObject> convert(Serializer serializer, CacheEntry<?> cacheEntry) {
     List list = (List) cacheEntry.getValue();
     List<StoreObject> storeObjects = new ArrayList<>(list.size());
     byte[] bytes;
