@@ -60,6 +60,7 @@ public class PersistenceSQLBriteTest extends ApplicationTestCase {
 
   @Before public void setUp() throws Exception {
     briteDatabase = PowerMockito.mock(BriteDatabase.class);
+    PowerMockito.spy(briteDatabase);
 
     persistence = new PersistenceSQLBrite(briteDatabase);
   }
@@ -252,7 +253,7 @@ public class PersistenceSQLBriteTest extends ApplicationTestCase {
 
     // Cursor mock
     Cursor cursor = mock(Cursor.class);
-    when(cursor.moveToNext()).thenReturn(true/*first interaction*/, false /*second interaction*/);
+    when(cursor.moveToNext()).thenReturn(false);
 
     // ContentValues Mock
     ContentValues contentValues = PowerMockito.mock(ContentValues.class);
@@ -283,7 +284,7 @@ public class PersistenceSQLBriteTest extends ApplicationTestCase {
 
     // Cursor mock
     Cursor cursor = mock(Cursor.class);
-    when(cursor.moveToNext()).thenReturn(true/*first interaction*/, false /*second interaction*/);
+    when(cursor.moveToNext()).thenReturn(false);
 
     // ContentValues Mock
     ContentValues contentValues = PowerMockito.mock(ContentValues.class);
