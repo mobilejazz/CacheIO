@@ -188,16 +188,7 @@ public class PersistenceSQLBriteTest extends ApplicationTestCase {
   @Test public void shouldPersistASingleStoreObject() throws Exception {
     // Given
     List<StoreObject> storeObjects = new ArrayList<>();
-
-    StoreObject storeObject = new StoreObjectBuilder().setKey(FAKE_KEY)
-        .setIndex(FAKE_INDEX)
-        .setValue(FAKE_VALUE)
-        .setType(FAKE_TYPE)
-        .setExpiryMillis(FAKE_EXPIRY_MILLIS)
-        .setMetaType(FAKE_METATYPE)
-        .setTimestamp(FAKE_TIMESTAMP)
-        .build();
-
+    StoreObject storeObject = provideAFakeStoreObject();
     storeObjects.add(storeObject);
 
     // Cursor mock
@@ -217,6 +208,66 @@ public class PersistenceSQLBriteTest extends ApplicationTestCase {
     doNothing().when(transaction).end();
     when(briteDatabase.query(anyString(), anyString())).thenReturn(cursor);
     when(briteDatabase.insert(anyString(), any(ContentValues.class))).thenReturn((long) 23);
+
+    boolean result = persistence.persist(storeObjects);
+
+    Assertions.assertThat(result).isTrue();
+  }
+
+  @Test public void shouldNotPersistASingleObject() throws Exception {
+    // Given
+    List<StoreObject> storeObjects = new ArrayList<>();
+    StoreObject storeObject = provideAFakeStoreObject();
+    storeObjects.add(storeObject);
+
+    // Cursor mock
+    Cursor cursor = mock(Cursor.class);
+    when(cursor.moveToNext()).thenReturn(false);
+
+    // ContentValues Mock
+    ContentValues contentValues = PowerMockito.mock(ContentValues.class);
+
+    PowerMockito.mockStatic(StoreObject.class);
+    PowerMockito.when(StoreObject.toContentValues(storeObject)).thenReturn(contentValues);
+
+    // When
+    BriteDatabase.Transaction transaction = mock(BriteDatabase.Transaction.class);
+    when(briteDatabase.newTransaction()).thenReturn(transaction);
+    doNothing().when(transaction).markSuccessful();
+    doNothing().when(transaction).end();
+    when(briteDatabase.query(anyString(), anyString())).thenReturn(cursor);
+    when(briteDatabase.insert(anyString(), any(ContentValues.class))).thenReturn((long) -1);
+
+    boolean result = persistence.persist(storeObjects);
+
+    Assertions.assertThat(result).isFalse();
+  }
+
+  @Test public void shouldPersistAListOfStoreObjects() throws Exception {
+    // Given
+    List<StoreObject> storeObjects = new ArrayList<>();
+    StoreObject storeObject = provideAFakeStoreObject();
+    storeObjects.add(storeObject);
+    storeObjects.add(storeObject);
+
+    // Cursor mock
+    Cursor cursor = mock(Cursor.class);
+    when(cursor.moveToNext()).thenReturn(true/*first interaction*/, false /*second interaction*/);
+
+    // ContentValues Mock
+    ContentValues contentValues = PowerMockito.mock(ContentValues.class);
+
+    PowerMockito.mockStatic(StoreObject.class);
+    PowerMockito.when(StoreObject.toContentValues(storeObject)).thenReturn(contentValues);
+
+    // When
+    BriteDatabase.Transaction transaction = mock(BriteDatabase.Transaction.class);
+    when(briteDatabase.newTransaction()).thenReturn(transaction);
+    doNothing().when(transaction).markSuccessful();
+    doNothing().when(transaction).end();
+    when(briteDatabase.query(anyString(), anyString())).thenReturn(cursor);
+    when(briteDatabase.insert(anyString(), any(ContentValues.class))).thenReturn((long) 23,
+        (long) 24);
 
     boolean result = persistence.persist(storeObjects);
 
