@@ -1,0 +1,95 @@
+/*
+ * Copyright (C) 2016 Mobile Jazz
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
+package com.mobilejazz.cacheio;
+
+import com.mobilejazz.cacheio.detector.cacheentry.CacheEntryDetectorFactory;
+import com.mobilejazz.cacheio.detector.cacheentry.ObjectCacheValueStrategy;
+import com.mobilejazz.cacheio.exceptions.CacheErrorException;
+import com.mobilejazz.cacheio.exceptions.CacheNotFoundException;
+import com.mobilejazz.cacheio.logging.AndroidLogger;
+import com.mobilejazz.cacheio.logging.LogLevel;
+import com.mobilejazz.cacheio.logging.Logger;
+import com.mobilejazz.cacheio.manager.entity.CacheEntry;
+import com.mobilejazz.cacheio.persistence.Persistence;
+import com.mobilejazz.cacheio.persistence.sqlbrite.PersistenceSQLBrite;
+import com.mobilejazz.cacheio.serializer.JavaSerializer;
+import com.mobilejazz.cacheio.serializer.Serializer;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@PrepareForTest(CacheEntryDetectorFactory.class) @RunWith(PowerMockRunner.class)
+public class CacheManagerTest extends ApplicationTestCase {
+
+  public static final String FAKE_KEY = "fake.key";
+  public static final byte[] FAKE_VALUE = new byte[] {};
+  public static final String FAKE_TYPE = "fake.type";
+  public static final long FAKE_EXPIRY_MILLIS = 1000;
+  public static final String FAKE_INDEX = "fake.index";
+  public static final String FAKE_METATYPE = "fake.metatype";
+  public static final long FAKE_TIMESTAMP = 10000;
+  public static final String FAKE_QUERY = "fake.query";
+
+  private Cache cache;
+
+  private Persistence persistence;
+  private Serializer serializer;
+
+  @Before public void setUp() throws Exception {
+    persistence = mock(PersistenceSQLBrite.class);
+    serializer = mock(JavaSerializer.class);
+    Logger logger = mock(AndroidLogger.class);
+
+    cache = new CacheManager(persistence, serializer, logger, LogLevel.NONE);
+  }
+
+  @Test(expected = CacheNotFoundException.class) public void shouldThrowACacheNotFoundException()
+      throws Exception {
+    when(persistence.obtain(FAKE_KEY)).thenThrow(CacheNotFoundException.class);
+
+    CacheEntry<Object> cacheEntry = cache.obtain(FAKE_KEY);
+  }
+
+  @Test(expected = CacheErrorException.class) public void shouldThrowACacheErrorException()
+      throws Exception {
+    when(persistence.obtain(FAKE_KEY)).thenThrow(CacheErrorException.class);
+
+    CacheEntry<Object> cacheEntry = cache.obtain(FAKE_KEY);
+  }
+
+  @Test public void shouldCallToPersistenceWhenObtainMethodIsCalled() throws Exception {
+    // Given
+    when(persistence.obtain(FAKE_KEY)).thenReturn(null);
+
+    ObjectCacheValueStrategy objectCacheValueStrategy = mock(ObjectCacheValueStrategy.class);
+    PowerMockito.mockStatic(CacheEntryDetectorFactory.class);
+    PowerMockito.when(CacheEntryDetectorFactory.obtain(null)).thenReturn(objectCacheValueStrategy);
+
+    // When
+    cache.obtain(FAKE_KEY);
+
+    // Then
+    verify(persistence).obtain(FAKE_KEY);
+  }
+}
