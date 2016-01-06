@@ -92,4 +92,15 @@ public class CacheManagerTest extends ApplicationTestCase {
     // Then
     verify(persistence).obtain(FAKE_KEY);
   }
+
+  @Test public void shouldCallToDeleteMethodInPersistenceWhenDeleteIsCalled() throws Exception {
+    // Given
+    when(persistence.delete(FAKE_KEY)).thenReturn(true);
+
+    // When
+    cache.delete(FAKE_KEY);
+
+    // Then
+    verify(persistence).delete(FAKE_KEY);
+  }
 }
