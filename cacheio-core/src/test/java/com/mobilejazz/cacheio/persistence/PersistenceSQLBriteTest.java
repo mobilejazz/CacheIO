@@ -194,10 +194,6 @@ public class PersistenceSQLBriteTest extends ApplicationTestCase {
     StoreObject storeObject = provideAFakeStoreObject();
     storeObjects.add(storeObject);
 
-    // Cursor mock
-    Cursor cursor = mock(Cursor.class);
-    when(cursor.moveToNext()).thenReturn(false);
-
     // ContentValues Mock
     ContentValues contentValues = PowerMockito.mock(ContentValues.class);
 
@@ -209,13 +205,13 @@ public class PersistenceSQLBriteTest extends ApplicationTestCase {
     when(briteDatabase.newTransaction()).thenReturn(transaction);
     doNothing().when(transaction).markSuccessful();
     doNothing().when(transaction).end();
-    when(briteDatabase.query(anyString(), anyString())).thenReturn(cursor);
     when(briteDatabase.insert(anyString(), any(ContentValues.class))).thenReturn((long) 23);
 
     boolean result = persistence.persist(storeObjects);
 
     Assertions.assertThat(result).isTrue();
     verify(briteDatabase, times(1)).insert(anyString(), any(ContentValues.class));
+    verify(briteDatabase, times(1)).delete(anyString(), anyString(), anyString());
   }
 
   @Test public void shouldNotPersistASingleObject() throws Exception {
@@ -224,10 +220,6 @@ public class PersistenceSQLBriteTest extends ApplicationTestCase {
     StoreObject storeObject = provideAFakeStoreObject();
     storeObjects.add(storeObject);
 
-    // Cursor mock
-    Cursor cursor = mock(Cursor.class);
-    when(cursor.moveToNext()).thenReturn(false);
-
     // ContentValues Mock
     ContentValues contentValues = PowerMockito.mock(ContentValues.class);
 
@@ -239,13 +231,13 @@ public class PersistenceSQLBriteTest extends ApplicationTestCase {
     when(briteDatabase.newTransaction()).thenReturn(transaction);
     doNothing().when(transaction).markSuccessful();
     doNothing().when(transaction).end();
-    when(briteDatabase.query(anyString(), anyString())).thenReturn(cursor);
     when(briteDatabase.insert(anyString(), any(ContentValues.class))).thenReturn((long) -1);
 
     boolean result = persistence.persist(storeObjects);
 
     Assertions.assertThat(result).isFalse();
     verify(briteDatabase, times(1)).insert(anyString(), any(ContentValues.class));
+    verify(briteDatabase, times(1)).delete(anyString(), anyString(), anyString());
   }
 
   @Test public void shouldPersistAListOfStoreObjects() throws Exception {
@@ -278,6 +270,7 @@ public class PersistenceSQLBriteTest extends ApplicationTestCase {
 
     Assertions.assertThat(result).isTrue();
     verify(briteDatabase, times(2)).insert(anyString(), any(ContentValues.class));
+    verify(briteDatabase, times(1)).delete(anyString(), anyString(), anyString());
   }
 
   @Test public void shouldNotPersistAListOfStoreObjects() throws Exception {
@@ -286,10 +279,6 @@ public class PersistenceSQLBriteTest extends ApplicationTestCase {
     StoreObject storeObject = provideAFakeStoreObject();
     storeObjects.add(storeObject);
     storeObjects.add(storeObject);
-
-    // Cursor mock
-    Cursor cursor = mock(Cursor.class);
-    when(cursor.moveToNext()).thenReturn(false);
 
     // ContentValues Mock
     ContentValues contentValues = PowerMockito.mock(ContentValues.class);
@@ -302,7 +291,6 @@ public class PersistenceSQLBriteTest extends ApplicationTestCase {
     when(briteDatabase.newTransaction()).thenReturn(transaction);
     doNothing().when(transaction).markSuccessful();
     doNothing().when(transaction).end();
-    when(briteDatabase.query(anyString(), anyString())).thenReturn(cursor);
     when(briteDatabase.insert(anyString(), any(ContentValues.class))).thenReturn((long) 23,
         (long) -1);
 
@@ -310,31 +298,7 @@ public class PersistenceSQLBriteTest extends ApplicationTestCase {
 
     Assertions.assertThat(result).isFalse();
     verify(briteDatabase, times(2)).insert(anyString(), any(ContentValues.class));
-  }
-
-  @Test public void shouldDeleteOneStoreObjectBeforeInsertIt() throws Exception {
-    // Given
-    List<StoreObject> storeObjects = new ArrayList<>();
-    StoreObject storeObject = provideAFakeStoreObject();
-    storeObjects.add(storeObject);
-    storeObjects.add(storeObject);
-
-    // Cursor mock
-    Cursor cursor = mock(Cursor.class);
-    when(cursor.getCount()).thenReturn(2);
-    when(cursor.moveToNext()).thenReturn(true /*first interaction*/, false /*second interaction*/);
-
-    // ContentValues Mock
-    ContentValues contentValues = PowerMockito.mock(ContentValues.class);
-
-    PowerMockito.mockStatic(StoreObject.class);
-    PowerMockito.when(StoreObject.toContentValues(storeObject)).thenReturn(contentValues);
-
-    // When
-    when(briteDatabase.query(anyString(), anyString())).thenReturn(cursor);
-    //when()
-
-
+    verify(briteDatabase, times(1)).delete(anyString(), anyString(), anyString());
   }
 
   private StoreObject provideAFakeStoreObject() {
