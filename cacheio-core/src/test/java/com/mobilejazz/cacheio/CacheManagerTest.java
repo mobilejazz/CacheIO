@@ -105,10 +105,19 @@ import static org.mockito.Mockito.when;
     when(persistence.delete(FAKE_KEY)).thenReturn(true);
 
     // When
-    cache.delete(FAKE_KEY);
+    boolean result = cache.delete(FAKE_KEY);
 
     // Then
     verify(persistence).delete(FAKE_KEY);
+    Assertions.assertThat(result).isTrue();
+  }
+
+  @Test public void shouldFailCacheDeleteIfPersistenceDeleteThrowException() throws Exception {
+    when(persistence.delete(FAKE_KEY)).thenThrow(CacheErrorException.class);
+
+    boolean result = cache.delete(FAKE_KEY);
+
+    Assertions.assertThat(result).isFalse();
   }
 
   @Test(expected = IllegalArgumentException.class)
