@@ -91,4 +91,8 @@ public class CacheIOTest extends ApplicationTestCase {
 
     Assertions.assertThat(cache).isNotNull();
   }
+
+  @Test(expected = IllegalArgumentException.class) public void shouldThrowExceptionIfCallToBuildWithoutArguments() throws Exception {
+    CacheIO.with(context).build();
+  }
 }
