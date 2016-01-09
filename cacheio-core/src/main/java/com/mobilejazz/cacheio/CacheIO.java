@@ -54,11 +54,12 @@ public class CacheIO {
     private Context context;
 
     public Builder(Context context) {
+      Preconditions.checkArgument(context, "context == null");
       this.context = context;
     }
 
     public Builder serializer(Serializer serializer) {
-      this.serializer = Preconditions.checkNotNull(serializer, "serializer == null");
+      this.serializer = Preconditions.checkArgument(serializer, "serializer == null");
       return this;
     }
 
@@ -72,17 +73,13 @@ public class CacheIO {
     }
 
     public Builder logLevel(LogLevel logLevel) {
-      this.logLevel = Preconditions.checkNotNull(logLevel, "LogLevel logLevel");
+      this.logLevel = Preconditions.checkArgument(logLevel, "logLevel == null");
       return this;
     }
 
     public CacheIO build() {
       if (persistence == null) {
         persistence = new PersistenceSQLBrite(PersistenceSQLBrite.generate(context, identifier));
-      }
-
-      if (serializer == null) {
-        throw new IllegalStateException("serializer == null");
       }
 
       if (logger == null) {
