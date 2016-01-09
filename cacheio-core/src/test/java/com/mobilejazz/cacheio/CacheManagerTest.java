@@ -18,17 +18,21 @@ package com.mobilejazz.cacheio;
 
 import com.mobilejazz.cacheio.detector.cacheentry.CacheEntryDetectorFactory;
 import com.mobilejazz.cacheio.detector.cacheentry.ObjectCacheValueStrategy;
+import com.mobilejazz.cacheio.detector.storeobject.ObjectTypeValueStrategy;
+import com.mobilejazz.cacheio.detector.storeobject.TypeDetectorFactory;
 import com.mobilejazz.cacheio.exceptions.CacheErrorException;
 import com.mobilejazz.cacheio.exceptions.CacheNotFoundException;
 import com.mobilejazz.cacheio.logging.AndroidLogger;
 import com.mobilejazz.cacheio.logging.LogLevel;
 import com.mobilejazz.cacheio.logging.Logger;
 import com.mobilejazz.cacheio.manager.entity.CacheEntry;
+import com.mobilejazz.cacheio.model.UserTestModel;
 import com.mobilejazz.cacheio.persistence.Persistence;
 import com.mobilejazz.cacheio.persistence.sqlbrite.PersistenceSQLBrite;
 import com.mobilejazz.cacheio.serializer.JavaSerializer;
 import com.mobilejazz.cacheio.serializer.Serializer;
 import java.util.Collections;
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,12 +40,13 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import static org.mockito.Matchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@PrepareForTest(CacheEntryDetectorFactory.class) @RunWith(PowerMockRunner.class)
-public class CacheManagerTest extends ApplicationTestCase {
+@PrepareForTest({ CacheEntryDetectorFactory.class, TypeDetectorFactory.class })
+@RunWith(PowerMockRunner.class) public class CacheManagerTest extends ApplicationTestCase {
 
   public static final String FAKE_KEY = "fake.key";
   public static final byte[] FAKE_VALUE = new byte[] {};
@@ -85,7 +90,8 @@ public class CacheManagerTest extends ApplicationTestCase {
 
     ObjectCacheValueStrategy objectCacheValueStrategy = mock(ObjectCacheValueStrategy.class);
     PowerMockito.mockStatic(CacheEntryDetectorFactory.class);
-    PowerMockito.when(CacheEntryDetectorFactory.obtain(null)).thenReturn(objectCacheValueStrategy);
+    PowerMockito.when(CacheEntryDetectorFactory.obtain(anyList()))
+        .thenReturn(objectCacheValueStrategy);
 
     // When
     cache.obtain(FAKE_KEY);
@@ -103,5 +109,48 @@ public class CacheManagerTest extends ApplicationTestCase {
 
     // Then
     verify(persistence).delete(FAKE_KEY);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowIllegalArgumentExceptionWhenCacheEntryIsNull() throws Exception {
+    // When
+    cache.persist(null);
+  }
+
+  @Test public void shouldCallToPersistencePersistWhenTheCachePersistMethodIsCalled()
+      throws Exception {
+    // Given
+    CacheEntry<UserTestModel> cacheEntry = provideCacheEntry();
+
+    ObjectTypeValueStrategy objectCacheValueStrategy = mock(ObjectTypeValueStrategy.class);
+    PowerMockito.mockStatic(TypeDetectorFactory.class);
+    PowerMockito.when(TypeDetectorFactory.obtain(cacheEntry.getValue()))
+        .thenReturn(objectCacheValueStrategy);
+
+    when(persistence.persist(anyList())).thenReturn(true);
+
+    // When
+    boolean result = cache.persist(cacheEntry);
+
+    // Then
+    verify(persistence).persist(anyList());
+    Assertions.assertThat(result).isTrue();
+  }
+
+  @Test public void shouldNotPersistACacheEntryIfPersistencePersitMethodThrowException()
+      throws Exception {
+    // Given
+    when(persistence.persist(anyList())).thenThrow(CacheErrorException.class);
+
+    // When
+    boolean result = cache.persist(provideCacheEntry());
+
+    // Then
+    Assertions.assertThat(result).isFalse();
+  }
+
+  private CacheEntry<UserTestModel> provideCacheEntry() {
+    return CacheEntry.create(FAKE_KEY, UserTestModel.class, new UserTestModel(),
+        FAKE_EXPIRY_MILLIS);
   }
 }
