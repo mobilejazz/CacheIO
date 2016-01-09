@@ -71,8 +71,8 @@ public class CacheIOTest extends ApplicationTestCase {
         .build();
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void shouldThrowExceptionIfContextIsNull() throws Exception {
+  @Test(expected = IllegalArgumentException.class) public void shouldThrowExceptionIfContextIsNull()
+      throws Exception {
     CacheIO cacheIO = CacheIO.with(null)
         .identifier(FAKE_IDENTIFIER)
         .logLevel(LogLevel.FULL)
@@ -92,7 +92,23 @@ public class CacheIOTest extends ApplicationTestCase {
     Assertions.assertThat(cache).isNotNull();
   }
 
-  @Test(expected = IllegalArgumentException.class) public void shouldThrowExceptionIfCallToBuildWithoutArguments() throws Exception {
+  @Test public void shouldCreateDiferentsCacheIOInstanceWithBuildMethod() throws Exception {
+    CacheIO.Builder builder = new CacheIO.Builder(context);
+    builder.identifier(FAKE_IDENTIFIER);
+    builder.logLevel(LogLevel.FULL);
+    builder.serializer(serializer);
+
+    CacheIO cacheIOOne = builder.build();
+    cacheIOOne.cacheDataSource();
+
+    CacheIO cacheIOTwo = builder.build();
+    cacheIOOne.cacheDataSource();
+
+    Assertions.assertThat(cacheIOOne).isNotEqualTo(cacheIOTwo);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowExceptionIfCallToBuildWithoutArguments() throws Exception {
     CacheIO.with(context).build();
   }
 }
