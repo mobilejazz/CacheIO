@@ -49,13 +49,7 @@ import static org.mockito.Mockito.when;
 @RunWith(PowerMockRunner.class) public class CacheManagerTest extends ApplicationTestCase {
 
   public static final String FAKE_KEY = "fake.key";
-  public static final byte[] FAKE_VALUE = new byte[] {};
-  public static final String FAKE_TYPE = "fake.type";
   public static final long FAKE_EXPIRY_MILLIS = 1000;
-  public static final String FAKE_INDEX = "fake.index";
-  public static final String FAKE_METATYPE = "fake.metatype";
-  public static final long FAKE_TIMESTAMP = 10000;
-  public static final String FAKE_QUERY = "fake.query";
 
   private Cache cache;
 
