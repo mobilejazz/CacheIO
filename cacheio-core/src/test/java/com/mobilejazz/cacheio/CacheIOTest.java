@@ -20,6 +20,7 @@ import android.content.Context;
 import com.mobilejazz.cacheio.logging.LogLevel;
 import com.mobilejazz.cacheio.serializer.JavaSerializer;
 import com.mobilejazz.cacheio.serializer.Serializer;
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -77,5 +78,17 @@ public class CacheIOTest extends ApplicationTestCase {
         .logLevel(LogLevel.FULL)
         .serializer(serializer)
         .build();
+  }
+
+  @Test public void shouldCreateAValidCacheObject() throws Exception {
+    CacheIO cacheIO = CacheIO.with(context)
+        .identifier(FAKE_IDENTIFIER)
+        .logLevel(LogLevel.FULL)
+        .serializer(serializer)
+        .build();
+
+    Cache cache = cacheIO.cacheDataSource();
+
+    Assertions.assertThat(cache).isNotNull();
   }
 }
