@@ -73,14 +73,8 @@ public class CacheIO {
 
     public CacheIO build() {
       checkArguments();
-
-      if (persistence == null) {
-        persistence = new PersistenceSQLBrite(PersistenceSQLBrite.generate(context, identifier));
-      }
-
-      if (logger == null) {
-        this.logger = new AndroidLogger();
-      }
+      this.persistence = new PersistenceSQLBrite(PersistenceSQLBrite.generate(context, identifier));
+      this.logger = new AndroidLogger();
 
       return new CacheIO(persistence, serializer, logger, logLevel);
     }
