@@ -60,7 +60,7 @@ public class CacheManager implements Cache {
     return strategy.convert(serializer, storeObjects);
   }
 
-  @Override public <T> boolean persist(CacheEntry<T> cacheEntry) throws CacheErrorException {
+  @Override public <T> boolean persist(CacheEntry<T> cacheEntry) {
     if (cacheEntry == null) {
       throw new IllegalArgumentException("cacheEntry == null");
     }

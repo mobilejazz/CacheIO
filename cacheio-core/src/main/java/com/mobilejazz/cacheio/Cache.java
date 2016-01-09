@@ -37,14 +37,14 @@ public interface Cache {
    *
    * @param entry - @link CacheEntry to save
    */
-  <T> boolean persist(CacheEntry<T> entry) throws CacheErrorException;
+  <T> boolean persist(CacheEntry<T> entry);
 
   /**
    * Remove the @link CacheEntry of the data base
    *
    * @param key - Key of the @link CacheEntry
    */
-  boolean delete(String key) throws CacheErrorException;
+  boolean delete(String key);
 
 /*  *//**
    * Check if the cache object is valid or not depending of the @CachingStrategy and if is not
