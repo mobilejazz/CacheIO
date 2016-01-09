@@ -36,7 +36,6 @@ public class CacheIO {
   }
 
   public Cache cacheDataSource() {
-    Preconditions.checkNotNull(cache, "cache == null! Create one using Builder instance!");
     return cache;
   }
 
@@ -58,38 +57,36 @@ public class CacheIO {
     }
 
     public Builder serializer(Serializer serializer) {
-      this.serializer = Preconditions.checkNotNull(serializer, "serializer == null");
+      this.serializer = serializer;
       return this;
     }
 
     public Builder identifier(String identifier) {
-      if (TextUtils.isEmpty(identifier)) {
-        throw new IllegalArgumentException("identifier == null OR database == empty");
-      }
-
       this.identifier = identifier;
       return this;
     }
 
     public Builder logLevel(LogLevel logLevel) {
-      this.logLevel = Preconditions.checkNotNull(logLevel, "LogLevel logLevel");
+      this.logLevel = logLevel;
       return this;
     }
 
     public CacheIO build() {
-      if (persistence == null) {
-        persistence = new PersistenceSQLBrite(PersistenceSQLBrite.generate(context, identifier));
-      }
-
-      if (serializer == null) {
-        throw new IllegalStateException("serializer == null");
-      }
-
-      if (logger == null) {
-        this.logger = new AndroidLogger();
-      }
+      checkArguments();
+      this.persistence = new PersistenceSQLBrite(PersistenceSQLBrite.generate(context, identifier));
+      this.logger = new AndroidLogger();
 
       return new CacheIO(persistence, serializer, logger, logLevel);
+    }
+
+    private void checkArguments() {
+      Preconditions.checkArgument(context, "context == null");
+      Preconditions.checkArgument(logLevel, "logLevel == null");
+      Preconditions.checkArgument(serializer, "serializer == null");
+
+      if (TextUtils.isEmpty(identifier)) {
+        throw new IllegalArgumentException("identifier == null OR database == empty");
+      }
     }
   }
 }

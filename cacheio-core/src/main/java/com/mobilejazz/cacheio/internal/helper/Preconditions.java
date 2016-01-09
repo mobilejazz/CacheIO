@@ -28,4 +28,12 @@ public class Preconditions {
     }
     return object;
   }
+
+  public static <T> T checkArgument(T object, String message) {
+    if (object == null) {
+      throw new IllegalArgumentException(message);
+    }
+
+    return object;
+  }
 }
