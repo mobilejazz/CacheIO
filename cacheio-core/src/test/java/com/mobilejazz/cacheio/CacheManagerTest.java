@@ -28,6 +28,7 @@ import com.mobilejazz.cacheio.persistence.Persistence;
 import com.mobilejazz.cacheio.persistence.sqlbrite.PersistenceSQLBrite;
 import com.mobilejazz.cacheio.serializer.JavaSerializer;
 import com.mobilejazz.cacheio.serializer.Serializer;
+import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -78,9 +79,9 @@ public class CacheManagerTest extends ApplicationTestCase {
     CacheEntry<Object> cacheEntry = cache.obtain(FAKE_KEY);
   }
 
-  @Test public void shouldCallToPersistenceWhenObtainMethodIsCalled() throws Exception {
+  @Test public void shouldCallToPersistenceObtainWhenCacheObtainIsCalled() throws Exception {
     // Given
-    when(persistence.obtain(FAKE_KEY)).thenReturn(null);
+    when(persistence.obtain(FAKE_KEY)).thenReturn(Collections.EMPTY_LIST);
 
     ObjectCacheValueStrategy objectCacheValueStrategy = mock(ObjectCacheValueStrategy.class);
     PowerMockito.mockStatic(CacheEntryDetectorFactory.class);
@@ -93,7 +94,7 @@ public class CacheManagerTest extends ApplicationTestCase {
     verify(persistence).obtain(FAKE_KEY);
   }
 
-  @Test public void shouldCallToDeleteMethodInPersistenceWhenDeleteIsCalled() throws Exception {
+  @Test public void shouldCallToPersistenceDeleteWhenCacheDeleteIsCalled() throws Exception {
     // Given
     when(persistence.delete(FAKE_KEY)).thenReturn(true);
 
