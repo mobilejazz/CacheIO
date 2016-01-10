@@ -26,11 +26,24 @@ public class CacheOpenHelper extends SQLiteOpenHelper {
 
   private static final int DB_VERSION = 1;
 
+  private Context context;
+  private String databaseName;
+
   public CacheOpenHelper(@NonNull Context context, String databaseName) {
     super(context, databaseName, null, DB_VERSION);
+    this.context = context;
+    this.databaseName = databaseName;
   }
 
-  // Private methods
+  @Override public void onCreate(@NonNull SQLiteDatabase db) {
+    db.execSQL(getCreateCacheTableQuery());
+  }
+
+  @Override public void onUpgrade(@NonNull SQLiteDatabase db, int oldVersion, int newVersion) {
+    if (newVersion > oldVersion) {
+      context.deleteDatabase(databaseName);
+    }
+  }
 
   @NonNull private static String getCreateCacheTableQuery() {
     return "CREATE TABLE "
@@ -56,13 +69,5 @@ public class CacheOpenHelper extends SQLiteOpenHelper {
         + CacheTableMeta.COLUMN_INDEX
         + ")"
         + ");";
-  }
-
-  @Override public void onCreate(@NonNull SQLiteDatabase db) {
-    db.execSQL(getCreateCacheTableQuery());
-  }
-
-  @Override public void onUpgrade(@NonNull SQLiteDatabase db, int oldVersion, int newVersion) {
-    //TODO: Implement
   }
 }
