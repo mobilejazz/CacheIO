@@ -45,7 +45,7 @@ public class CacheOpenHelper extends SQLiteOpenHelper {
     }
   }
 
-  @NonNull private String getCreateCacheTableQuery() {
+  @NonNull public String getCreateCacheTableQuery() {
     return "CREATE TABLE "
         + CacheTableMeta.TABLE
         + "("
