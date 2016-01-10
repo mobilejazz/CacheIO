@@ -17,27 +17,41 @@
 package com.mobilejazz.cacheio;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import com.mobilejazz.cacheio.manager.CacheOpenHelper;
-import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class CacheOpenHelperTest extends ApplicationTestCase {
 
   public static final String FAKE_NAME_DATABASE = "fake.name.database";
 
   @Mock Context context;
+  @Mock SQLiteDatabase sqLiteDatabase;
 
   private CacheOpenHelper cacheOpenHelper;
 
   @Before public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
+
     cacheOpenHelper = new CacheOpenHelper(context, FAKE_NAME_DATABASE);
   }
 
-  @Test public void testName() throws Exception {
-    Assertions.assertThat(true).isTrue();
+  @Test public void shouldDeleteDatabaseWhenTheDataBaseIsUpgraded() throws Exception {
+    cacheOpenHelper.onUpgrade(sqLiteDatabase, 1, 2);
+
+    verify(context).deleteDatabase(anyString());
+  }
+
+  @Test public void shouldNotDeleteTheDataBaseWhenTheDataBaseVersionIsTheSame() throws Exception {
+    cacheOpenHelper.onUpgrade(sqLiteDatabase, 1, 1);
+
+    verify(context, times(0)).deleteDatabase(anyString());
   }
 }
