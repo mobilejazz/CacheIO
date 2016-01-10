@@ -19,6 +19,7 @@ package com.mobilejazz.cacheio;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import com.mobilejazz.cacheio.manager.CacheOpenHelper;
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -53,5 +54,19 @@ public class CacheOpenHelperTest extends ApplicationTestCase {
     cacheOpenHelper.onUpgrade(sqLiteDatabase, 1, 1);
 
     verify(context, times(0)).deleteDatabase(anyString());
+  }
+
+  @Test public void shouldCreateTheCacheIOTable() throws Exception {
+    cacheOpenHelper.onCreate(sqLiteDatabase);
+
+    verify(sqLiteDatabase).execSQL(anyString());
+  }
+
+  @Test public void shouldCreateTheSQLScriptToCreateTheCacheTableProperly() throws Exception {
+    String tableExpected =
+        "CREATE TABLE cache(_key TEXT NOT NULL, type TEXT NOT NULL, value BLOB NOT NULL, expiry INTEGER NOT NULL, _index TEXT NOT NULL, metatype TEXT NOT NULL, timestamp INTEGER NOT NULL, PRIMARY KEY (_key, _index));";
+    String cacheTableSQL = cacheOpenHelper.getCreateCacheTableQuery();
+
+    Assertions.assertThat(cacheTableSQL).isEqualTo(tableExpected);
   }
 }
