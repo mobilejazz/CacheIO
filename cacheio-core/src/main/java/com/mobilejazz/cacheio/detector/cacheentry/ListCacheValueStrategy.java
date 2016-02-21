@@ -17,8 +17,10 @@
 package com.mobilejazz.cacheio.detector.cacheentry;
 
 import com.mobilejazz.cacheio.manager.entity.CacheEntry;
+import com.mobilejazz.cacheio.manager.entity.CacheEntryBuilder;
 import com.mobilejazz.cacheio.manager.entity.StoreObject;
 import com.mobilejazz.cacheio.serializer.Serializer;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,12 +63,7 @@ public class ListCacheValueStrategy implements CacheValueStrategy {
       }
     }
 
-    CacheEntry<T> cacheEntry = new CacheEntry<>();
-    cacheEntry.setKey(key);
-    cacheEntry.setType(type);
-    cacheEntry.setValue((T) values);
-    cacheEntry.setExpiryMillis(expiryMillis);
-
-    return cacheEntry;
+    return new CacheEntryBuilder().
+        setKey(key).setType(type).setValue(values).setExpiryMillis(expiryMillis).build();
   }
 }
