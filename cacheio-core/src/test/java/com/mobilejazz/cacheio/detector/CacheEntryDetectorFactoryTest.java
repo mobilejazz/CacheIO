@@ -23,22 +23,35 @@ import com.mobilejazz.cacheio.detector.cacheentry.ListCacheValueStrategy;
 import com.mobilejazz.cacheio.detector.cacheentry.ObjectCacheValueStrategy;
 import com.mobilejazz.cacheio.manager.entity.StoreObject;
 import com.mobilejazz.cacheio.manager.entity.StoreObjectBuilder;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.*;
+
 public class CacheEntryDetectorFactoryTest extends ApplicationTestCase {
+
+  public static final String FAKE_KEY = "fake.key";
+  public static final String FAKE_INDEX = "fake.index";
+  public static final String FAKE_TYPE = "fake.type";
+  public static final String FAKE_METATYPE = "fake.metatype";
+  public static final byte[] FAKE_VALUE = new byte[123];
+  public static final int FAKE_EXPIRY_MILLIS = 5400;
+  public static final int FAKE_TIMESTAMP = 1234;
 
   @Before public void setUp() throws Exception {
     // Nothing to set up
   }
 
   @Test public void shouldReturnAListCacheValueStrategy() throws Exception {
-    StoreObject storeObject =
-        new StoreObjectBuilder().setMetaType(List.class.getSimpleName()).build();
+    StoreObject storeObject = new StoreObjectBuilder().setKey(FAKE_KEY)
+        .setIndex(FAKE_INDEX)
+        .setType(FAKE_TYPE)
+        .setMetaType(List.class.getSimpleName())
+        .setValue(FAKE_VALUE)
+        .setExpiryMillis(FAKE_EXPIRY_MILLIS)
+        .setTimestamp(FAKE_TIMESTAMP)
+        .build();
 
     List<StoreObject> storeObjects = Arrays.asList(storeObject, storeObject);
 
@@ -48,7 +61,14 @@ public class CacheEntryDetectorFactoryTest extends ApplicationTestCase {
   }
 
   @Test public void shouldReturnAObjectCacheValueStrategy() throws Exception {
-    StoreObject storeObject = new StoreObjectBuilder().setMetaType(Object.class.getSimpleName()).build();
+    StoreObject storeObject = new StoreObjectBuilder().setKey(FAKE_KEY)
+        .setIndex(FAKE_INDEX)
+        .setType(FAKE_TYPE)
+        .setMetaType(Object.class.getSimpleName())
+        .setValue(FAKE_VALUE)
+        .setExpiryMillis(FAKE_EXPIRY_MILLIS)
+        .setTimestamp(FAKE_TIMESTAMP)
+        .build();
 
     List<StoreObject> storeObjects = Collections.singletonList(storeObject);
 
@@ -58,12 +78,20 @@ public class CacheEntryDetectorFactoryTest extends ApplicationTestCase {
   }
 
   @Test public void shouldReturnANullCacheValueStrategy() throws Exception {
-    StoreObject storeObject = new StoreObjectBuilder().setMetaType(null).build();
+    StoreObject storeObject = new StoreObjectBuilder().setKey(FAKE_KEY)
+        .setIndex(FAKE_INDEX)
+        .setType(FAKE_TYPE)
+        .setMetaType(null)
+        .setValue(FAKE_VALUE)
+        .setExpiryMillis(FAKE_EXPIRY_MILLIS)
+        .setTimestamp(FAKE_TIMESTAMP)
+        .build();
 
     List<StoreObject> storeObjects = Collections.singletonList(storeObject);
 
     CacheValueStrategy cacheValueStrategy = CacheEntryDetectorFactory.obtain(storeObjects);
 
-    Assertions.assertThat(cacheValueStrategy).isInstanceOf(CacheValueStrategy.NullCacheValueStrategy.class);
+    Assertions.assertThat(cacheValueStrategy)
+        .isInstanceOf(CacheValueStrategy.NullCacheValueStrategy.class);
   }
 }

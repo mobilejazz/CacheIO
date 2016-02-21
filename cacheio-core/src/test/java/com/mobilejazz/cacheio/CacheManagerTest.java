@@ -31,7 +31,6 @@ import com.mobilejazz.cacheio.persistence.Persistence;
 import com.mobilejazz.cacheio.persistence.sqlbrite.PersistenceSQLBrite;
 import com.mobilejazz.cacheio.serializer.JavaSerializer;
 import com.mobilejazz.cacheio.serializer.Serializer;
-import java.util.Collections;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,10 +39,10 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.util.*;
+
 import static org.mockito.Matchers.anyList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @PrepareForTest({ CacheEntryDetectorFactory.class, TypeDetectorFactory.class })
 @RunWith(PowerMockRunner.class) public class CacheManagerTest extends ApplicationTestCase {
@@ -145,8 +144,15 @@ import static org.mockito.Mockito.when;
     // Given
     when(persistence.persist(anyList())).thenThrow(CacheErrorException.class);
 
+    CacheEntry<UserTestModel> cacheEntry = provideCacheEntry();
+
+    ObjectTypeValueStrategy objectCacheValueStrategy = mock(ObjectTypeValueStrategy.class);
+    PowerMockito.mockStatic(TypeDetectorFactory.class);
+    PowerMockito.when(TypeDetectorFactory.obtain(cacheEntry.getValue()))
+        .thenReturn(objectCacheValueStrategy);
+
     // When
-    boolean result = cache.persist(provideCacheEntry());
+    boolean result = cache.persist(cacheEntry);
 
     // Then
     Assertions.assertThat(result).isFalse();
