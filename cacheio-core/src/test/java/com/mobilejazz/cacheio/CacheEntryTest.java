@@ -18,6 +18,7 @@ package com.mobilejazz.cacheio;
 
 import android.support.annotation.NonNull;
 import com.mobilejazz.cacheio.manager.entity.CacheEntry;
+import com.mobilejazz.cacheio.manager.entity.CacheEntryBuilder;
 import com.mobilejazz.cacheio.model.UserTestModel;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -29,8 +30,11 @@ public class CacheEntryTest extends ApplicationTestCase {
 
   @Test public void shouldCreateTheCacheEntryProperly() throws Exception {
     UserTestModel userTestModel = fakeUserTestModel();
-    CacheEntry<UserTestModel> cacheEntry =
-        CacheEntry.create(FAKE_KEY, UserTestModel.class, userTestModel, FAKE_EXPIRY_MILLIS);
+    CacheEntry cacheEntry = new CacheEntryBuilder<UserTestModel>().setKey(FAKE_KEY)
+        .setType(UserTestModel.class)
+        .setValue(userTestModel)
+        .setExpiryMillis(FAKE_EXPIRY_MILLIS)
+        .build();
 
     Assertions.assertThat(cacheEntry).isNotNull();
     Assertions.assertThat(cacheEntry.getKey()).isEqualTo(FAKE_KEY);
@@ -45,30 +49,54 @@ public class CacheEntryTest extends ApplicationTestCase {
   public void shouldThrowIllegalArgumentWhenKeyIsNull() throws Exception {
     UserTestModel userTestModel = fakeUserTestModel();
 
-    CacheEntry<UserTestModel> cacheEntry =
-        CacheEntry.create(null, UserTestModel.class, userTestModel, FAKE_EXPIRY_MILLIS);
+    //CacheEntry<UserTestModel> cacheEntry =
+    //    CacheEntry.create(null, UserTestModel.class, userTestModel, FAKE_EXPIRY_MILLIS);
+
+    CacheEntry cacheEntry = new CacheEntryBuilder<UserTestModel>().setKey(null)
+        .setType(UserTestModel.class)
+        .setValue(userTestModel)
+        .setExpiryMillis(FAKE_EXPIRY_MILLIS)
+        .build();
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void shouldThrowIllegalArgumentWhenTypeIsNull() throws Exception {
     UserTestModel userTestModel = fakeUserTestModel();
 
-    CacheEntry<UserTestModel> cacheEntry =
-        CacheEntry.create(FAKE_KEY, null, userTestModel, FAKE_EXPIRY_MILLIS);
+    //CacheEntry<UserTestModel> cacheEntry =
+    //    CacheEntry.create(FAKE_KEY, null, userTestModel, FAKE_EXPIRY_MILLIS);
+
+    CacheEntry cacheEntry = new CacheEntryBuilder<UserTestModel>().setKey(FAKE_KEY)
+        .setType(null)
+        .setValue(userTestModel)
+        .setExpiryMillis(FAKE_EXPIRY_MILLIS)
+        .build();
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void shouldThrowIllegalArgumentWhenValueIsNull() throws Exception {
-    CacheEntry<UserTestModel> cacheEntry =
-        CacheEntry.create(FAKE_KEY, UserTestModel.class, null, FAKE_EXPIRY_MILLIS);
+    //CacheEntry<UserTestModel> cacheEntry =
+    //    CacheEntry.create(FAKE_KEY, UserTestModel.class, null, FAKE_EXPIRY_MILLIS);
+
+    CacheEntry cacheEntry = new CacheEntryBuilder<UserTestModel>().setKey(FAKE_KEY)
+        .setType(UserTestModel.class)
+        .setValue(null)
+        .setExpiryMillis(FAKE_EXPIRY_MILLIS)
+        .build();
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void shouldThrowIllegalArgumentWhenExpiryMillisIsInvalid() throws Exception {
     UserTestModel userTestModel = fakeUserTestModel();
 
-    CacheEntry<UserTestModel> cacheEntry =
-        CacheEntry.create(FAKE_KEY, UserTestModel.class, userTestModel, -23);
+    //CacheEntry<UserTestModel> cacheEntry =
+    //    CacheEntry.create(FAKE_KEY, UserTestModel.class, userTestModel, -23);
+
+    CacheEntry cacheEntry = new CacheEntryBuilder<UserTestModel>().setKey(FAKE_KEY)
+        .setType(UserTestModel.class)
+        .setValue(userTestModel)
+        .setExpiryMillis(-23)
+        .build();
   }
 
   @NonNull private UserTestModel fakeUserTestModel() {

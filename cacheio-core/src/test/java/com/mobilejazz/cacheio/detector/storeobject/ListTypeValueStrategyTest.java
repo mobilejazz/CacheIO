@@ -18,15 +18,16 @@ package com.mobilejazz.cacheio.detector.storeobject;
 
 import com.mobilejazz.cacheio.ApplicationTestCase;
 import com.mobilejazz.cacheio.manager.entity.CacheEntry;
+import com.mobilejazz.cacheio.manager.entity.CacheEntryBuilder;
 import com.mobilejazz.cacheio.manager.entity.StoreObject;
 import com.mobilejazz.cacheio.model.UserTestModelSerializable;
 import com.mobilejazz.cacheio.serializer.JavaSerializer;
 import com.mobilejazz.cacheio.serializer.Serializer;
-import java.util.ArrayList;
-import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.*;
 
 public class ListTypeValueStrategyTest extends ApplicationTestCase {
 
@@ -35,6 +36,7 @@ public class ListTypeValueStrategyTest extends ApplicationTestCase {
 
   private Serializer serializer;
   private ListTypeValueStrategy listTypeValueStrategy;
+  public static final String FAKE_KEY = "test.list";
 
   @Before public void setUp() throws Exception {
     serializer = new JavaSerializer();
@@ -45,9 +47,16 @@ public class ListTypeValueStrategyTest extends ApplicationTestCase {
     // Given
     List<UserTestModelSerializable> userTestModelSerializables =
         fakeListOfUserTestModelSerializables();
+    //CacheEntry<UserTestModelSerializable> cacheEntry =
+    //    CacheEntry.create("test.list", UserTestModelSerializable.class, userTestModelSerializables,
+    //        FAKE_EXPIRY_MILLIS);
+
     CacheEntry<UserTestModelSerializable> cacheEntry =
-        CacheEntry.create("test.list", UserTestModelSerializable.class, userTestModelSerializables,
-            FAKE_EXPIRY_MILLIS);
+        new CacheEntryBuilder<UserTestModelSerializable>().setKey(FAKE_KEY)
+            .setType(UserTestModelSerializable.class)
+            .setValue(userTestModelSerializables)
+            .setExpiryMillis(FAKE_EXPIRY_MILLIS)
+            .build();
 
     // When
     List<StoreObject> storeObjects = listTypeValueStrategy.convert(serializer, cacheEntry);
@@ -61,7 +70,7 @@ public class ListTypeValueStrategyTest extends ApplicationTestCase {
     List<UserTestModelSerializable> userTestModelSerializables =
         fakeListOfUserTestModelSerializables();
     CacheEntry<UserTestModelSerializable> cacheEntry =
-        CacheEntry.create("test.list", UserTestModelSerializable.class, userTestModelSerializables,
+        CacheEntry.create(FAKE_KEY, UserTestModelSerializable.class, userTestModelSerializables,
             FAKE_EXPIRY_MILLIS);
 
     // When

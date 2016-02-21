@@ -16,12 +16,7 @@
 
 package com.mobilejazz.cacheio.manager.entity;
 
-import android.text.TextUtils;
-import com.mobilejazz.cacheio.internal.helper.Preconditions;
-
 public class CacheEntry<T> {
-
-  public static final long NON_EXPIRY_MILLIS = -1;
 
   /**
    * String key that identifies this object in the storage
@@ -46,8 +41,7 @@ public class CacheEntry<T> {
   /**
    * Private constructor
    */
-  private CacheEntry(String key, Class<T> type, T value, long expiryMillis) {
-    checkArguments(key, type, value, expiryMillis);
+  CacheEntry(String key, Class<T> type, T value, long expiryMillis) {
     this.key = key;
     this.type = type;
     this.value = value;
@@ -57,7 +51,7 @@ public class CacheEntry<T> {
   public CacheEntry() {
   }
 
-  @SuppressWarnings("unchecked")
+  @Deprecated @SuppressWarnings("unchecked")
   public static <T, V> CacheEntry<T> create(String key, Class<T> type, V value, long expiryMillis) {
     return new CacheEntry(key, type, value, expiryMillis);
   }
@@ -96,18 +90,5 @@ public class CacheEntry<T> {
 
   public void setExpiryMillis(long expiryMillis) {
     this.expiryMillis = expiryMillis;
-  }
-
-  private void checkArguments(String key, Class<T> type, T value, long expiryMillis) {
-    Preconditions.checkArgument(type, "type == null");
-    Preconditions.checkArgument(value, "value == null");
-
-    if (TextUtils.isEmpty(key)) {
-      throw new IllegalArgumentException("key == null OR Empty");
-    }
-
-    if (expiryMillis <= NON_EXPIRY_MILLIS) {
-      throw new IllegalArgumentException("expiry millis < -1");
-    }
   }
 }
