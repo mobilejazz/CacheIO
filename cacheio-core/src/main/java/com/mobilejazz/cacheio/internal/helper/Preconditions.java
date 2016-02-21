@@ -16,6 +16,8 @@
 
 package com.mobilejazz.cacheio.internal.helper;
 
+import android.text.TextUtils;
+
 public class Preconditions {
 
   private Preconditions() {
@@ -31,6 +33,14 @@ public class Preconditions {
 
   public static <T> T checkArgument(T object, String message) {
     if (object == null) {
+      throw new IllegalArgumentException(message);
+    }
+
+    return object;
+  }
+
+  public static String checkIsEmpty(String object, String message) {
+    if (TextUtils.isEmpty(object)) {
       throw new IllegalArgumentException(message);
     }
 
