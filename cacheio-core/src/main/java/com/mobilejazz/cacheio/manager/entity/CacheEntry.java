@@ -55,7 +55,6 @@ public class CacheEntry<T> {
   }
 
   public CacheEntry() {
-    throw new UnsupportedOperationException("Should use the factory method");
   }
 
   @SuppressWarnings("unchecked")
