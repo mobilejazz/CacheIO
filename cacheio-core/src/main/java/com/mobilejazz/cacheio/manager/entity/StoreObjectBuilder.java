@@ -16,7 +16,10 @@
 
 package com.mobilejazz.cacheio.manager.entity;
 
+import com.mobilejazz.cacheio.internal.helper.Preconditions;
+
 public class StoreObjectBuilder {
+
   private String key;
   private String type;
   private byte[] value;
@@ -61,6 +64,17 @@ public class StoreObjectBuilder {
   }
 
   public StoreObject build() {
+    Preconditions.checkIsEmpty(key, "key == null or empty");
+    Preconditions.checkIsEmpty(type, "type == null or empty");
+    Preconditions.checkArgument(value, "value == null");
+    Preconditions.checkArgument(expiryMillis, "expiry millis == null");
+    Preconditions.checkIsEmpty(index, "index == null");
+    Preconditions.checkArgument(timestamp, "timestamp == null");
+
+    if (expiryMillis < -1 || timestamp < -1) {
+      throw new IllegalArgumentException("expiry millis or timestamp is invalid");
+    }
+
     return new StoreObject(key, type, value, expiryMillis, index, metaType, timestamp);
   }
 }
