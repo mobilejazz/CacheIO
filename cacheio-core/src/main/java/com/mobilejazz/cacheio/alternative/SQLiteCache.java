@@ -79,9 +79,7 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
         final String[] args = new String[keysAsStrings.length + 1];
         args[0] = timeStr;
 
-        for (int i = 0; i < keysAsStrings.length; i++) {
-            args[i + 1] = keysAsStrings[i];
-        }
+        System.arraycopy(keysAsStrings, 0, args, 1, keysAsStrings.length);
 
         final Cursor cursor = config.db.rawQuery(sql, keysAsStrings);
 
