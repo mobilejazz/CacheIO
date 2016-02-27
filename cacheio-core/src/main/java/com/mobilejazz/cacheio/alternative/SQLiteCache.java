@@ -81,13 +81,13 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
 
         System.arraycopy(keysAsStrings, 0, args, 1, keysAsStrings.length);
 
-        final Cursor cursor = config.db.rawQuery(sql, keysAsStrings);
-
         final MappingContext mappingContext = config.mappingContext;
 
         return Single.create(new Single.OnSubscribe<Map<K, V>>() {
             @Override
             public void call(SingleSubscriber<? super Map<K, V>> subscriber) {
+
+                final Cursor cursor = config.db.rawQuery(sql, args);
 
                 final Map<K, V> result = new HashMap<>();
 
@@ -106,6 +106,8 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
                 }
 
                 subscriber.onSuccess(result);
+
+                cursor.close();
 
             }
         }).observeOn(scheduler);
