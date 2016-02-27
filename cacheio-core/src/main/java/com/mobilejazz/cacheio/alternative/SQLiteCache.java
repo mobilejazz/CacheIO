@@ -9,13 +9,16 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import rx.Scheduler;
 import rx.Single;
 import rx.SingleSubscriber;
+import rx.schedulers.Schedulers;
 
 import static com.mobilejazz.cacheio.internal.helper.Preconditions.checkNotNull;
 
@@ -33,9 +36,9 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
         this.config = new Builder<>(proto);
     }
 
-    private String generatePlaceholders(K... keys) {
+    private static String generatePlaceholders(int count) {
         final StringBuilder builder = new StringBuilder();
-        for (K key : keys) {
+        for(int i=0; i<count; i++){
             builder.append(",").append("?");
         }
         return builder.toString().substring(1);
@@ -45,6 +48,15 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
         String[] result = new String[keys.length];
         for (int i = 0; i < keys.length; i++) {
             result[i] = config.keyMapper.toString(keys[i]);
+        }
+        return result;
+    }
+
+    private String[] keysAsString(Collection<K> keys) {
+        String[] result = new String[keys.size()];
+        int idx = 0;
+        for (K key : keys) {
+            result[idx++] = config.keyMapper.toString(key);
         }
         return result;
     }
@@ -61,7 +73,7 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
         final Date now = new Date();
         final String timeStr = Long.toString(now.getTime());
 
-        final String sql = "SELECT * FROM " + config.tableName + " WHERE " + COLUMN_EXPIRES + " > ? AND " + COLUMN_KEY + " IN (" + generatePlaceholders(keys) + ")";
+        final String sql = "SELECT * FROM " + config.tableName + " WHERE " + COLUMN_EXPIRES + " > ? AND " + COLUMN_KEY + " IN (" + generatePlaceholders(keys.length) + ")";
 
         final String[] keysAsStrings = keysAsString(keys);
         final String[] args = new String[keysAsStrings.length + 1];
@@ -123,7 +135,15 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
 
                 try {
 
-                    for (K key : map.keySet()) {
+                    // Delete the keys first
+
+                    final Set<K> keys = map.keySet();
+
+                    final String sql = "SELECT * FROM " + config.tableName + " WHERE " + COLUMN_KEY + " IN (" + generatePlaceholders(keys.size()) + ")";
+                    db.execSQL(sql, keysAsString(keys));
+
+                    // Insert
+                    for (K key : keys) {
 
                         final V value = map.get(key);
                         final ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
@@ -173,7 +193,7 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
 
                     db.beginTransaction();
 
-                    final String sql = "SELECT * FROM " + config.tableName + " WHERE " + COLUMN_KEY + " IN (" + generatePlaceholders(keys) + ")";
+                    final String sql = "SELECT * FROM " + config.tableName + " WHERE " + COLUMN_KEY + " IN (" + generatePlaceholders(keys.length) + ")";
                     db.execSQL(sql, keysAsString(keys));
 
                     db.endTransaction();
@@ -207,7 +227,7 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
         private KeyMapper<K> keyMapper;
         private MappingContext mappingContext;
 
-        private Scheduler scheduler;
+        private Scheduler scheduler = Schedulers.immediate();
 
         private Builder() {
         }
