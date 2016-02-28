@@ -196,7 +196,7 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
 
                     db.beginTransaction();
 
-                    final String sql = "SELECT * FROM " + config.tableName + " WHERE " + COLUMN_KEY + " IN (" + generatePlaceholders(keys.length) + ")";
+                    final String sql = "DELETE * FROM " + config.tableName + " WHERE " + COLUMN_KEY + " IN (" + generatePlaceholders(keys.length) + ")";
                     db.execSQL(sql, keysAsString(keys));
 
                     db.endTransaction();
