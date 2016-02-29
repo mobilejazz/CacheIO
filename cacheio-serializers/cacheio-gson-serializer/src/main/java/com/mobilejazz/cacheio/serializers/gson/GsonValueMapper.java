@@ -9,11 +9,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 
-public class GsonMapper implements Cache.Mapper {
+public class GsonValueMapper implements Cache.ValueMapper {
 
     private Gson gson;
 
-    public GsonMapper(Gson gson) {
+    public GsonValueMapper(Gson gson) {
         this.gson = gson;
     }
 

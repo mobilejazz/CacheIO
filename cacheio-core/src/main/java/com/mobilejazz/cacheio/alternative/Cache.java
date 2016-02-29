@@ -41,11 +41,17 @@ public interface Cache<K, V> {
 
     Single<Collection<K>> removeAll(Scheduler scheduler, Collection<K> keys);
 
-    interface Mapper {
+    interface ValueMapper {
 
         void write(Object value, OutputStream out) throws SerializerException;
 
         <T> T read(Class<T> type, InputStream in) throws SerializerException;
+
+    }
+
+    interface VersionMapper<T> {
+
+        long getVersion(T model);
 
     }
 

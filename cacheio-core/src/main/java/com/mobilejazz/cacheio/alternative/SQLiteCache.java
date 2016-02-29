@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -34,6 +35,7 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
 
     private static final String COLUMN_KEY = "key";
     private static final String COLUMN_VALUE = "value";
+    private static final String COLUMN_VERSION = "version";
     private static final String COLUMN_CREATED = "created";
     private static final String COLUMN_EXPIRES = "expires";
 
@@ -99,7 +101,7 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
 
         System.arraycopy(keysAsStrings, 0, args, 1, keysAsStrings.length);
 
-        final Mapper valueMapper = config.valueMapper;
+        final ValueMapper valueValueMapper = config.valueMapper;
 
         return Single.create(new Single.OnSubscribe<Map<K, V>>() {
             @Override
@@ -117,7 +119,7 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
                     final ByteArrayInputStream bytesIn = new ByteArrayInputStream(blob);
 
                     final K key = config.keyMapper.fromString(keyString);
-                    final V value = valueMapper.read(config.valueType, bytesIn);
+                    final V value = valueValueMapper.read(config.valueType, bytesIn);
 
                     result.put(key, value);
 
@@ -140,50 +142,83 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
     @Override
     public Single<Map<K, V>> putAll(Scheduler scheduler, final Map<K, V> map, long expiry, TimeUnit unit) {
 
-        final Mapper valueMapper = config.valueMapper;
+        final ValueMapper valueMapper = config.valueMapper;
+        final KeyMapper<K> keyMapper = config.keyMapper;
+        final VersionMapper<V> versionMapper = config.versionMapper;
         final SQLiteDatabase db = config.db;
 
         final long createdAt = System.currentTimeMillis();
         final long expiresAt = createdAt + unit.toMillis(expiry);
+
 
         return Single.create(new Single.OnSubscribe<Map<K, V>>() {
 
             @Override
             public void call(SingleSubscriber<? super Map<K, V>> subscriber) {
 
+                final Map<K, V> result = new HashMap<>(map.size());
+
                 db.beginTransaction();
 
                 try {
 
-                    // Delete the keys first
-
                     final Set<K> keys = map.keySet();
+                    final Set<K> keysToUpdate = new HashSet<K>(keys.size());
 
-                    final String sql = "DELETE FROM " + config.tableName + " WHERE " + COLUMN_KEY + " IN (" + generatePlaceholders(keys.size()) + ")";
-                    db.execSQL(sql, keysAsString(keys));
-
-                    // Insert
                     for (K key : keys) {
 
                         final V value = map.get(key);
-                        final ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-                        valueMapper.write(value, bytesOut);
+                        final String keyStr = keyMapper.toString(key);
+                        final String versionStr = Long.toString(versionMapper.getVersion(value));
 
-                        bytesOut.close();
+                        final Cursor cursor = db.query(config.tableName, new String[]{COLUMN_KEY}, "key = ? AND version > ?", new String[]{keyStr, versionStr}, null, null, null, null);
 
-                        final ContentValues values = new ContentValues(2);
-                        values.put(COLUMN_KEY, key.toString());
-                        values.put(COLUMN_VALUE, bytesOut.toByteArray());
-                        values.put(COLUMN_CREATED, createdAt);
-                        values.put(COLUMN_EXPIRES, expiresAt);
+                        if (cursor.getCount() == 0) {
+                            // we have the latest version and need to update
+                            keysToUpdate.add(key);
+                        }
 
-                        db.insert(config.tableName, null, values);
+                        cursor.close();
+
+                    }
+
+                    if (keysToUpdate.size() > 0) {
+
+                        // delete previous entries
+
+                        final String sql = "DELETE FROM " + config.tableName + " WHERE " + COLUMN_KEY + " IN (" + generatePlaceholders(keysToUpdate.size()) + ")";
+                        db.execSQL(sql, keysAsString(keysToUpdate));
+
+                        // Insert new entries
+
+                        for (K key : keysToUpdate) {
+
+                            final V value = map.get(key);
+                            final long version = versionMapper.getVersion(value);
+
+                            final ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+                            valueMapper.write(value, bytesOut);
+
+                            bytesOut.close();
+
+                            final ContentValues values = new ContentValues(2);
+                            values.put(COLUMN_KEY, key.toString());
+                            values.put(COLUMN_VALUE, bytesOut.toByteArray());
+                            values.put(COLUMN_VERSION, version);
+                            values.put(COLUMN_CREATED, createdAt);
+                            values.put(COLUMN_EXPIRES, expiresAt);
+
+                            db.insert(config.tableName, null, values);
+
+                            result.put(key, value);
+
+                        }
 
                     }
 
                     db.setTransactionSuccessful();
 
-                    subscriber.onSuccess(map);
+                    subscriber.onSuccess(result);
 
                 } catch (Throwable t) {
                     subscriber.onError(t);
@@ -241,7 +276,7 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
 
                     subscriber.onSuccess(keys);
 
-                } catch(Throwable t){
+                } catch (Throwable t) {
                     subscriber.onError(t);
                 }
 
@@ -252,7 +287,7 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
 
     private static String generatePlaceholders(int count) {
         final StringBuilder builder = new StringBuilder();
-        for(int i=0; i<count; i++){
+        for (int i = 0; i < count; i++) {
             builder.append(",").append("?");
         }
         return builder.toString().substring(1);
@@ -286,7 +321,8 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
         private SQLiteDatabase db;
 
         private KeyMapper<K> keyMapper;
-        private Mapper valueMapper;
+        private ValueMapper valueMapper;
+        private VersionMapper<V> versionMapper;
 
         private Scheduler scheduler = Schedulers.immediate();
 
@@ -301,6 +337,7 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
             this.tableName = proto.tableName;
             this.keyMapper = proto.keyMapper;
             this.valueMapper = proto.valueMapper;
+            this.versionMapper = proto.versionMapper;
             this.db = proto.db;
             this.scheduler = proto.scheduler;
         }
@@ -320,12 +357,12 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
             return this;
         }
 
-        public Builder<K, V> setKeyType(Class<K> keyType) {
+        protected Builder<K, V> setKeyType(Class<K> keyType) {
             this.keyType = keyType;
             return this;
         }
 
-        public Builder<K, V> setValueType(Class<V> valueType) {
+        protected Builder<K, V> setValueType(Class<V> valueType) {
             this.valueType = valueType;
             return this;
         }
@@ -340,8 +377,13 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
             return this;
         }
 
-        public Builder<K, V> setValueMapper(Mapper valueMapper) {
+        public Builder<K, V> setValueMapper(ValueMapper valueMapper) {
             this.valueMapper = valueMapper;
+            return this;
+        }
+
+        public Builder<K, V> setVersionMapper(VersionMapper<V> versionMapper) {
+            this.versionMapper = versionMapper;
             return this;
         }
 
@@ -353,17 +395,17 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
                 this.tableName = valueType.getCanonicalName().replaceAll(".", "_");
             }
 
-            if(keyMapper == null){
+            if (keyMapper == null) {
 
-                if(keyType == String.class){
+                if (keyType == String.class) {
                     keyMapper = (KeyMapper<K>) new StringKeyMapper();
-                } else if(keyType == Integer.class){
+                } else if (keyType == Integer.class) {
                     keyMapper = (KeyMapper<K>) new IntegerKeyMapper();
-                } else if(keyType == int.class){
+                } else if (keyType == int.class) {
                     keyMapper = (KeyMapper<K>) new IntegerKeyMapper();
-                } else if(keyType == Long.class){
+                } else if (keyType == Long.class) {
                     keyMapper = (KeyMapper<K>) new LongKeyMapper();
-                } else if(keyType == long.class){
+                } else if (keyType == long.class) {
                     keyMapper = (KeyMapper<K>) new LongKeyMapper();
                 }
 
@@ -378,7 +420,7 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
             checkNotNull(keyMapper, "Key mapper cannot be null");
             checkNotNull(valueMapper, "Mapping context cannot be null");
             checkNotNull(scheduler, "Scheduler cannot be null");
-
+            checkNotNull(versionMapper, "Version mapper cannot be null");
 
             //
             final DbHelper dbHelper = new DbHelper(context, databaseName, tableName);
@@ -397,7 +439,7 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
         static final int DATABASE_VERSION = 1;
 
         static final String CREATE_FORMAT = "CREATE TABLE IF NOT EXISTS %s ( " +
-                "   key TEXT PRIMARY KEY, value BLOB NOT NULL, " +
+                "   key TEXT PRIMARY KEY, value BLOB NOT NULL, version REAL NOT NULL, " +
                 "   created REAL NOT NULL, expires REAL NOT NULL" +
                 ")";
 
@@ -407,7 +449,7 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
 
         private final String tableName;
 
-        public DbHelper(Context context, String databaseName, String tableName){
+        public DbHelper(Context context, String databaseName, String tableName) {
             super(context, databaseName, null, DATABASE_VERSION);
             this.tableName = tableName;
         }
@@ -423,7 +465,7 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
             onCreate(db);
         }
 
-        public void removeExpired(){
+        public void removeExpired() {
             final long now = System.currentTimeMillis();
             getWritableDatabase().execSQL(String.format(DELETE_EXPIRED_FORMAT, tableName), new Object[]{now});
         }
