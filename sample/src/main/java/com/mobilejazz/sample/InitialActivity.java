@@ -11,7 +11,9 @@ import com.mobilejazz.cacheio.serializers.gson.GsonMapper;
 import com.mobilejazz.sample.gson.GsonFactory;
 import com.mobilejazz.sample.model.User;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -77,10 +79,13 @@ public class InitialActivity extends AppCompatActivity {
 
             putLatch.await();
 
-
             final CountDownLatch getLatch = new CountDownLatch(1);
 
-            final Single<Map<Integer, User>> getOp = cache.getAll(1, 2);
+            final List<Integer> keys = new ArrayList<>();
+            keys.add(1);
+            keys.add(2);
+
+            final Single<Map<Integer, User>> getOp = cache.getAll(keys);
 
             getOp.subscribe(new SingleSubscriber<Map<Integer, User>>() {
                 @Override
@@ -102,7 +107,7 @@ public class InitialActivity extends AppCompatActivity {
             // wait 5 seconds and allow the entries to expire
             Thread.sleep(5000);
 
-            final Single<Map<Integer, User>> expiredGetOp = cache.getAll(1, 2);
+            final Single<Map<Integer, User>> expiredGetOp = cache.getAll(keys);
 
             expiredGetOp.subscribe(new SingleSubscriber<Map<Integer, User>>() {
                 @Override

@@ -4,6 +4,7 @@ import com.mobilejazz.cacheio.exceptions.SerializerException;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -19,17 +20,26 @@ public interface Cache<K, V> {
 
     Single<V> put(Scheduler scheduler, K key, V value, long expiry, TimeUnit unit);
 
-    Single<Map<K, V>> getAll(K... keys);
+    Single<V> get(K key);
 
-    Single<Map<K, V>> getAll(Scheduler scheduler, K... keys);
+    Single<V> get(Scheduler scheduler, K key);
+
+    Single<K> remove(K key);
+
+    Single<K> remove(Scheduler scheduler, K key);
+
+
+    Single<Map<K, V>> getAll(Collection<K> keys);
+
+    Single<Map<K, V>> getAll(Scheduler scheduler, Collection<K> keys);
 
     Single<Map<K, V>> putAll(Map<K, V> map, long expiry, TimeUnit unit);
 
     Single<Map<K, V>> putAll(Scheduler scheduler, Map<K, V> map, long expiry, TimeUnit unit);
 
-    Single<K[]> removeAll(K... keys);
+    Single<Collection<K>> removeAll(Collection<K> keys);
 
-    Single<K[]> removeAll(Scheduler scheduler, K... keys);
+    Single<Collection<K>> removeAll(Scheduler scheduler, Collection<K> keys);
 
     interface Mapper {
 

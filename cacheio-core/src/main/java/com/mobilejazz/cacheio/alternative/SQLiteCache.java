@@ -13,6 +13,7 @@ import com.mobilejazz.cacheio.alternative.mappers.StringKeyMapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -53,7 +54,7 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
         map.put(key, value);
 
         return putAll(map, expiry, unit)
-                .map(new Func1<Map<K,V>, V>() {
+                .map(new Func1<Map<K, V>, V>() {
                     @Override
                     public V call(Map<K, V> map) {
                         return map.get(key);
@@ -62,17 +63,35 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
     }
 
     @Override
-    public Single<Map<K, V>> getAll(K... keys) {
+    public Single<V> get(K key) {
+        return get(config.scheduler, key);
+    }
+
+    @Override
+    public Single<V> get(Scheduler scheduler, final K key) {
+        final Collection<K> keys = new ArrayList<>(1);
+        keys.add(key);
+        return getAll(scheduler, keys)
+                .map(new Func1<Map<K, V>, V>() {
+                    @Override
+                    public V call(Map<K, V> map) {
+                        return map.get(key);
+                    }
+                });
+    }
+
+    @Override
+    public Single<Map<K, V>> getAll(Collection<K> keys) {
         return getAll(config.scheduler, keys);
     }
 
     @Override
-    public Single<Map<K, V>> getAll(Scheduler scheduler, K... keys) {
+    public Single<Map<K, V>> getAll(Scheduler scheduler, Collection<K> keys) {
 
         final Date now = new Date();
         final String timeStr = Long.toString(now.getTime());
 
-        final String sql = "SELECT * FROM " + config.tableName + " WHERE " + COLUMN_EXPIRES + " > ? AND " + COLUMN_KEY + " IN (" + generatePlaceholders(keys.length) + ")";
+        final String sql = "SELECT * FROM " + config.tableName + " WHERE " + COLUMN_EXPIRES + " > ? AND " + COLUMN_KEY + " IN (" + generatePlaceholders(keys.size()) + ")";
 
         final String[] keysAsStrings = keysAsString(keys);
         final String[] args = new String[keysAsStrings.length + 1];
@@ -179,27 +198,48 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
 
 
     @Override
-    public Single<K[]> removeAll(K... keys) {
+    public Single<K> remove(K key) {
+        return remove(config.scheduler, key);
+    }
+
+    @Override
+    public Single<K> remove(Scheduler scheduler, K key) {
+        final Collection<K> keys = new ArrayList<>(1);
+        keys.add(key);
+        return removeAll(scheduler, keys)
+                .map(new Func1<Collection<K>, K>() {
+                    @Override
+                    public K call(Collection<K> keys) {
+                        return keys.iterator().next();
+                    }
+                });
+    }
+
+    @Override
+    public Single<Collection<K>> removeAll(Collection<K> keys) {
         return removeAll(config.scheduler, keys);
     }
 
     @Override
-    public Single<K[]> removeAll(Scheduler scheduler, final K... keys) {
+    public Single<Collection<K>> removeAll(Scheduler scheduler, final Collection<K> keys) {
 
         final SQLiteDatabase db = config.db;
 
-        return Single.create(new Single.OnSubscribe<K[]>() {
+        return Single.create(new Single.OnSubscribe<Collection<K>>() {
             @Override
-            public void call(SingleSubscriber<? super K[]> subscriber) {
+            public void call(SingleSubscriber<? super Collection<K>> subscriber) {
 
                 try {
 
                     db.beginTransaction();
 
-                    final String sql = "DELETE FROM " + config.tableName + " WHERE " + COLUMN_KEY + " IN (" + generatePlaceholders(keys.length) + ")";
+                    final String sql = "DELETE FROM " + config.tableName + " WHERE " + COLUMN_KEY + " IN (" + generatePlaceholders(keys.size()) + ")";
                     db.execSQL(sql, keysAsString(keys));
 
+                    db.setTransactionSuccessful();
                     db.endTransaction();
+
+                    subscriber.onSuccess(keys);
 
                 } catch(Throwable t){
                     subscriber.onError(t);
@@ -216,14 +256,6 @@ public class SQLiteCache<K, V> implements Cache<K, V> {
             builder.append(",").append("?");
         }
         return builder.toString().substring(1);
-    }
-
-    private String[] keysAsString(K... keys) {
-        String[] result = new String[keys.length];
-        for (int i = 0; i < keys.length; i++) {
-            result[i] = config.keyMapper.toString(keys[i]);
-        }
-        return result;
     }
 
     private String[] keysAsString(Collection<K> keys) {
