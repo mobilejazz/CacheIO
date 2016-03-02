@@ -25,7 +25,7 @@ public class AsyncCacheWrapper<K, V> implements AsyncCache<K, V> {
     }
 
     private <T> Future<T> future(Single<T> single){
-        return single.toObservable().toBlocking().toFuture();
+        return single.toObservable().observeOn(config.scheduler).toBlocking().toFuture();
     }
 
     @Override
