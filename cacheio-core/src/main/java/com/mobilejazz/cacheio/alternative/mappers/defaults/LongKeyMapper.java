@@ -1,11 +1,11 @@
-package com.mobilejazz.cacheio.alternative.mappers;
+package com.mobilejazz.cacheio.alternative.mappers.defaults;
 
-import com.mobilejazz.cacheio.alternative.Cache;
+import com.mobilejazz.cacheio.alternative.RxCache;
 
 /**
  * Created by bmcgee on 28/02/2016.
  */
-public class LongKeyMapper implements Cache.KeyMapper<Long> {
+public class LongKeyMapper implements RxCache.KeyMapper<Long> {
 
     @Override
     public String toString(Long key) {

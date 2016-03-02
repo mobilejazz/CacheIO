@@ -1,6 +1,6 @@
 package com.mobilejazz.sample.model;
 
-import com.mobilejazz.cacheio.alternative.Cache;
+import com.mobilejazz.cacheio.alternative.RxCache;
 
 public class User {
 
@@ -44,7 +44,7 @@ public class User {
         return this;
     }
 
-    public static final class VersionMapper implements Cache.VersionMapper<User> {
+    public static final class VersionMapper implements RxCache.VersionMapper<User> {
         @Override
         public long getVersion(User model) {
             return model.getVersion();

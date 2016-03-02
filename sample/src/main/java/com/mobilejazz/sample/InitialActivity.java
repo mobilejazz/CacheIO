@@ -5,17 +5,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 
-import com.mobilejazz.cacheio.alternative.Cache;
-import com.mobilejazz.cacheio.alternative.SQLiteCache;
+import com.mobilejazz.cacheio.alternative.RxCache;
 import com.mobilejazz.cacheio.serializers.gson.GsonValueMapper;
 import com.mobilejazz.sample.gson.GsonFactory;
 import com.mobilejazz.sample.model.User;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import rx.Single;
@@ -32,7 +26,7 @@ public class InitialActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_initial);
 
-        final Cache<Integer, User> cache = SQLiteCache.newBuilder(Integer.class, User.class)
+        final RxCache<Integer, User> rxCache = SQLiteRxCache.newBuilder(Integer.class, User.class)
                 .setContext(getApplicationContext())
                 .setDatabaseName("CacheDatabase2")
                 .setTableName("Users")
@@ -59,7 +53,7 @@ public class InitialActivity extends AppCompatActivity {
 //
 //            // Note the put isn't carried out until you call subscribe on the Single<T> object which is returned
 //            // This is due to the nature of the Observable contract
-//            final Single<Map<Integer, User>> putOp = cache.putAll(entries, 1, TimeUnit.SECONDS);
+//            final Single<Map<Integer, User>> putOp = rxCache.putAll(entries, 1, TimeUnit.SECONDS);
 //
 //            final CountDownLatch putLatch = new CountDownLatch(1);
 //
@@ -85,7 +79,7 @@ public class InitialActivity extends AppCompatActivity {
 //            keys.add(1);
 //            keys.add(2);
 //
-//            final Single<Map<Integer, User>> getOp = cache.getAll(keys);
+//            final Single<Map<Integer, User>> getOp = rxCache.getAll(keys);
 //
 //            getOp.subscribe(new SingleSubscriber<Map<Integer, User>>() {
 //                @Override
@@ -107,7 +101,7 @@ public class InitialActivity extends AppCompatActivity {
 //            // wait 5 seconds and allow the entries to expire
 //            Thread.sleep(5000);
 //
-//            final Single<Map<Integer, User>> expiredGetOp = cache.getAll(keys);
+//            final Single<Map<Integer, User>> expiredGetOp = rxCache.getAll(keys);
 //
 //            expiredGetOp.subscribe(new SingleSubscriber<Map<Integer, User>>() {
 //                @Override
@@ -129,12 +123,12 @@ public class InitialActivity extends AppCompatActivity {
         userOne.setName("Version 3")
                 .setVersion(3L);
 
-        cache.remove(userOne.getId())
+        rxCache.remove(userOne.getId())
                 .flatMap(new Func1<Integer, Single<User>>() {
                     @Override
                     public Single<User> call(Integer integer) {
                         Log.d(TAG, "User removed = " + integer);
-                        return cache.put(userOne.getId(), userOne, Long.MAX_VALUE, TimeUnit.SECONDS);
+                        return rxCache.put(userOne.getId(), userOne, Long.MAX_VALUE, TimeUnit.SECONDS);
                     }
                 })
                 .flatMap(new Func1<User, Single<User>>() {
@@ -145,7 +139,7 @@ public class InitialActivity extends AppCompatActivity {
 
                         // try to insert an old version
 
-                        return cache.put(userOne.getId(), userOne.setName("version 2").setVersion(2L), Long.MAX_VALUE, TimeUnit.SECONDS);
+                        return rxCache.put(userOne.getId(), userOne.setName("version 2").setVersion(2L), Long.MAX_VALUE, TimeUnit.SECONDS);
                     }
                 })
                 .flatMap(new Func1<User, Single<User>>() {
@@ -156,7 +150,7 @@ public class InitialActivity extends AppCompatActivity {
                         Log.d(TAG, "Failed to insert old user = " + (user == null));
 
                         // try to insert a newer version
-                        return cache.put(userOne.getId(), userOne.setName("version 4").setVersion(4L), Long.MAX_VALUE, TimeUnit.SECONDS);
+                        return rxCache.put(userOne.getId(), userOne.setName("version 4").setVersion(4L), Long.MAX_VALUE, TimeUnit.SECONDS);
                     }
                 })
                 .map(new Func1<User, User>() {
