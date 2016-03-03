@@ -26,12 +26,12 @@ public class FloatKeyMapperTest {
   private final KeyMapper<Float> mapper = new FloatKeyMapper();
 
   @Test(expected = IllegalArgumentException.class) @SuppressWarnings("ResultOfMethodCallIgnored")
-  public void shouldThrowIllegalArgumentExceptionIfMappingToStringTheValueIsNull() {
+  public void shouldThrowIllegalArgumentExceptionIfMappingToStringWithNullValue() {
     mapper.toString(null);
   }
 
   @Test(expected = IllegalArgumentException.class) @SuppressWarnings("ResultOfMethodCallIgnored")
-  public void shouldThrowIllegalArgumentExceptionIfMappingFromStringTheValueIsNull() {
+  public void shouldThrowIllegalArgumentExceptionIfMappingFromStringWithNullValue() {
     mapper.fromString(null);
   }
 
