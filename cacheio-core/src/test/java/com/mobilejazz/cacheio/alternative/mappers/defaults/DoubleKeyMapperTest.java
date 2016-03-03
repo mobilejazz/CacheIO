@@ -21,9 +21,9 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class StringKeyMapperTest {
+public class DoubleKeyMapperTest {
 
-  private final KeyMapper<String> mapper = new StringKeyMapper();
+  private final KeyMapper<Double> mapper = new DoubleKeyMapper();
 
   @Test(expected = IllegalArgumentException.class) @SuppressWarnings("ResultOfMethodCallIgnored")
   public void shouldThrowIllegalArgumentExceptionIfMappingToStringWithNullValue() {
@@ -36,14 +36,14 @@ public class StringKeyMapperTest {
   }
 
   @Test public void shouldMappingToStringAValue() throws Exception {
-    String result = mapper.toString("1");
+    String result = mapper.toString(1.2);
 
-    assertThat(result).isEqualTo("1");
+    assertThat(result).isEqualTo("1.2");
   }
 
   @Test public void shouldMappingFromStringAValue() throws Exception {
-    String result = mapper.fromString("1");
+    Double result = mapper.fromString("1.2");
 
-    assertThat(result).isEqualTo("1");
+    assertThat(result).isEqualTo(1.2);
   }
 }

@@ -21,9 +21,9 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class StringKeyMapperTest {
+public class FloatKeyMapperTest {
 
-  private final KeyMapper<String> mapper = new StringKeyMapper();
+  private final KeyMapper<Float> mapper = new FloatKeyMapper();
 
   @Test(expected = IllegalArgumentException.class) @SuppressWarnings("ResultOfMethodCallIgnored")
   public void shouldThrowIllegalArgumentExceptionIfMappingToStringWithNullValue() {
@@ -36,14 +36,14 @@ public class StringKeyMapperTest {
   }
 
   @Test public void shouldMappingToStringAValue() throws Exception {
-    String result = mapper.toString("1");
+    String result = mapper.toString(1f);
 
-    assertThat(result).isEqualTo("1");
+    assertThat(result).isEqualTo("1.0");
   }
 
   @Test public void shouldMappingFromStringAValue() throws Exception {
-    String result = mapper.fromString("1");
+    Float result = mapper.fromString("1.0");
 
-    assertThat(result).isEqualTo("1");
+    assertThat(result).isEqualTo(1f);
   }
 }
