@@ -1,11 +1,9 @@
 package com.mobilejazz.cacheio.alternative.mappers.defaults;
 
-import com.mobilejazz.cacheio.alternative.RxCache;
 
-/**
- * Created by bmcgee on 28/02/2016.
- */
-public class IntegerKeyMapper implements RxCache.KeyMapper<Integer> {
+import com.mobilejazz.cacheio.alternative.mappers.KeyMapper;
+
+public class IntegerKeyMapper implements KeyMapper<Integer> {
 
     @Override
     public String toString(Integer key) {

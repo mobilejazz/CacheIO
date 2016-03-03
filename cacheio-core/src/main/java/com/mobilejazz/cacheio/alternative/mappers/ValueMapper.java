@@ -5,7 +5,7 @@ import com.mobilejazz.cacheio.exceptions.SerializerException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-interface ValueMapper {
+public interface ValueMapper {
 
     void write(Object value, OutputStream out) throws SerializerException;
 

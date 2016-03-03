@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-public interface BlockingCache<K, V> {
+public interface SyncCache<K, V> {
 
     V get(K key);
 

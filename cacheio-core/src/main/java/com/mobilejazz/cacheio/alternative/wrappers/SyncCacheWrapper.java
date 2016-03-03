@@ -1,7 +1,7 @@
 package com.mobilejazz.cacheio.alternative.wrappers;
 
 import com.mobilejazz.cacheio.alternative.AsyncCache;
-import com.mobilejazz.cacheio.alternative.BlockingCache;
+import com.mobilejazz.cacheio.alternative.SyncCache;
 
 import java.util.Collection;
 import java.util.Map;
@@ -11,11 +11,11 @@ import java.util.concurrent.TimeUnit;
 import static com.mobilejazz.cacheio.internal.helper.Preconditions.checkNotNull;
 
 
-public class BlockingCacheWrapper<K, V> implements BlockingCache<K, V> {
+public class SyncCacheWrapper<K, V> implements SyncCache<K, V> {
 
     private final Builder<K, V> config;
 
-    private BlockingCacheWrapper(Builder<K, V> config) {
+    private SyncCacheWrapper(Builder<K, V> config) {
         this.config = config;
     }
 
@@ -95,14 +95,14 @@ public class BlockingCacheWrapper<K, V> implements BlockingCache<K, V> {
             return this;
         }
 
-        public BlockingCacheWrapper<K, V> build(){
+        public SyncCacheWrapper<K, V> build(){
 
             checkNotNull(delegate, "Delegate cannot be null");
 
             checkNotNull(keyType, "Key type cannot be null");
             checkNotNull(valueType, "Value type cannot be null");
 
-            return new BlockingCacheWrapper<>(this);
+            return new SyncCacheWrapper<>(this);
         }
     }
 }

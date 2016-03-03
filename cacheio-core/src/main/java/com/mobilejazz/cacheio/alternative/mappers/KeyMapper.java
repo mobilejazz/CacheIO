@@ -1,7 +1,7 @@
 package com.mobilejazz.cacheio.alternative.mappers;
 
 
-interface KeyMapper<T> {
+public interface KeyMapper<T> {
 
     String toString(T key);
 
