@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import static com.mobilejazz.cacheio.internal.helper.Preconditions.checkArgument;
 import static com.mobilejazz.cacheio.internal.helper.Preconditions.checkNotNull;
 
 
@@ -16,7 +17,7 @@ public class SyncCacheWrapper<K, V> implements SyncCache<K, V> {
     private final Builder<K, V> config;
 
     private SyncCacheWrapper(Builder<K, V> config) {
-        this.config = config;
+        this.config = new Builder<>(config);
     }
 
     private <T> T blocking(Future<T> future){
@@ -63,7 +64,7 @@ public class SyncCacheWrapper<K, V> implements SyncCache<K, V> {
                 .setValueType(valueType);
     }
 
-    private static final class Builder<K, V> {
+    public static final class Builder<K, V> {
 
         private FutureCache<K, V> delegate;
 
@@ -97,10 +98,9 @@ public class SyncCacheWrapper<K, V> implements SyncCache<K, V> {
 
         public SyncCacheWrapper<K, V> build(){
 
-            checkNotNull(delegate, "Delegate cannot be null");
-
-            checkNotNull(keyType, "Key type cannot be null");
-            checkNotNull(valueType, "Value type cannot be null");
+            checkArgument(keyType, "Key type cannot be null");
+            checkArgument(valueType, "Value type cannot be null");
+            checkArgument(delegate, "Delegate cannot be null");
 
             return new SyncCacheWrapper<>(this);
         }
