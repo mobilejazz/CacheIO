@@ -29,6 +29,7 @@ import com.mobilejazz.cacheio.persistence.Persistence;
 import com.mobilejazz.cacheio.strategy.CachingStrategy;
 import com.mobilejazz.cacheio.strategy.CachingStrategyObject;
 import com.squareup.sqlbrite.BriteDatabase;
+import com.squareup.sqlbrite.QueryObservable;
 import com.squareup.sqlbrite.SqlBrite;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +50,7 @@ public class PersistenceSQLBrite implements Persistence {
 
   @Override public List<StoreObject> obtain(String key)
       throws CacheNotFoundException, CacheErrorException {
+
     Cursor entry = db.query(
         "SELECT * FROM " + CacheTableMeta.TABLE + " WHERE " + CacheTableMeta.COLUMN_KEY + " = ?",
         key);

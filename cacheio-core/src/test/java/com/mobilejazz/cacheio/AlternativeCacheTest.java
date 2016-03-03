@@ -27,7 +27,7 @@ import org.junit.Test;
 
 import static org.mockito.Mockito.mock;
 
-public class CacheIOTest extends ApplicationTestCase {
+public class AlternativeCacheTest extends ApplicationTestCase {
 
   public static final String FAKE_IDENTIFIER = "fake.identifier";
   private Context context;
