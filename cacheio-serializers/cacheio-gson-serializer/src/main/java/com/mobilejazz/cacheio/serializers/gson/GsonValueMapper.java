@@ -1,7 +1,7 @@
 package com.mobilejazz.cacheio.serializers.gson;
 
 import com.google.gson.Gson;
-import com.mobilejazz.cacheio.alternative.RxCache;
+import com.mobilejazz.cacheio.alternative.mappers.ValueMapper;
 import com.mobilejazz.cacheio.exceptions.SerializerException;
 
 import java.io.IOException;
@@ -9,7 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 
-public class GsonValueMapper implements RxCache.ValueMapper {
+public class GsonValueMapper implements ValueMapper {
 
     private Gson gson;
 
