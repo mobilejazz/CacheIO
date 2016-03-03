@@ -108,7 +108,6 @@ public class AsyncCacheWrapper<K, V> implements AsyncCache<K, V> {
         public AsyncCacheWrapper<K, V> build(){
 
             checkNotNull(delegate, "Delegate cannot be null");
-
             checkNotNull(keyType, "Key type cannot be null");
             checkNotNull(valueType, "Value type cannot be null");
 
