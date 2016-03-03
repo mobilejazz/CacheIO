@@ -7,11 +7,13 @@ import static com.mobilejazz.cacheio.internal.helper.Preconditions.checkArgument
 public class LongKeyMapper implements KeyMapper<Long> {
 
   @Override public String toString(Long key) {
-    return checkArgument(key, "key cannot be null").toString();
+    checkArgument(key, "key cannot be null");
+    return key.toString();
   }
 
   @Override public Long fromString(String str) {
-    return Long.parseLong(checkArgument(str, "str cannot be null"));
+    checkArgument(str, "str cannot be null");
+    return Long.parseLong(str);
   }
 
 }
