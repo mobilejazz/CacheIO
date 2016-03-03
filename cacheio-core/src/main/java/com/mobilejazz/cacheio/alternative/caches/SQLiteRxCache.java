@@ -97,7 +97,8 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
 
   }
 
-  @Override public Single<Map<K, V>> putAll(final Map<K, V> map, final long expiry, final TimeUnit unit) {
+  @Override
+  public Single<Map<K, V>> putAll(final Map<K, V> map, final long expiry, final TimeUnit unit) {
 
     return Single.create(new Single.OnSubscribe<Map<K, V>>() {
       @Override public void call(SingleSubscriber<? super Map<K, V>> subscriber) {
@@ -235,14 +236,14 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
       final VersionMapper<V> versionMapper = config.versionMapper;
       final ValueMapper valueMapper = config.valueMapper;
 
-      final Map<K, V> result = new HashMap<>(map.size());
-
-      final long createdAt = now.getTime();
-      final long expiresAt = createdAt + expiryUnit.toMillis(expiry);
-
-      db.beginTransaction();
-
       try {
+
+        final Map<K, V> result = new HashMap<>(map.size());
+
+        final long createdAt = now.getTime();
+        final long expiresAt = createdAt + expiryUnit.toMillis(expiry);
+
+        db.beginTransaction();
 
         final Set<K> keys = map.keySet();
         final Set<K> keysToUpdate = new HashSet<K>(keys.size());
