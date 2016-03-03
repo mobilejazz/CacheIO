@@ -1,6 +1,6 @@
 package com.mobilejazz.cacheio.alternative.wrappers;
 
-import com.mobilejazz.cacheio.alternative.AsyncCache;
+import com.mobilejazz.cacheio.alternative.FutureCache;
 import com.mobilejazz.cacheio.alternative.SyncCache;
 
 import java.util.Collection;
@@ -65,7 +65,7 @@ public class SyncCacheWrapper<K, V> implements SyncCache<K, V> {
 
     private static final class Builder<K, V> {
 
-        private AsyncCache<K, V> delegate;
+        private FutureCache<K, V> delegate;
 
         private Class<K> keyType;
         private Class<V> valueType;
@@ -80,7 +80,7 @@ public class SyncCacheWrapper<K, V> implements SyncCache<K, V> {
         }
 
 
-        public Builder<K, V> setDelegate(AsyncCache<K, V> delegate) {
+        public Builder<K, V> setDelegate(FutureCache<K, V> delegate) {
             this.delegate = delegate;
             return this;
         }

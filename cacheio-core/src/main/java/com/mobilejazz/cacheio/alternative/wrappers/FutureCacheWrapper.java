@@ -1,31 +1,28 @@
 package com.mobilejazz.cacheio.alternative.wrappers;
 
-import com.mobilejazz.cacheio.alternative.AsyncCache;
+import com.mobilejazz.cacheio.alternative.FutureCache;
 import com.mobilejazz.cacheio.alternative.RxCache;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import rx.Scheduler;
 import rx.Single;
-import rx.schedulers.Schedulers;
 
-import static com.mobilejazz.cacheio.internal.helper.Preconditions.checkNotNull;
+import static com.mobilejazz.cacheio.internal.helper.Preconditions.checkArgument;
 
 
-public class AsyncCacheWrapper<K, V> implements AsyncCache<K, V> {
+public class FutureCacheWrapper<K, V> implements FutureCache<K, V> {
 
     private final Builder<K, V> config;
 
-    private AsyncCacheWrapper(Builder<K, V> config) {
-        this.config = config;
+    private FutureCacheWrapper(Builder<K, V> config) {
+        this.config = new Builder<>(config);
     }
 
     private <T> Future<T> future(Single<T> single){
-        return single.toObservable().observeOn(config.scheduler).toBlocking().toFuture();
+        return single.toObservable().toBlocking().toFuture();
     }
 
     @Override
@@ -64,30 +61,20 @@ public class AsyncCacheWrapper<K, V> implements AsyncCache<K, V> {
                 .setValueType(valueType);
     }
 
-    private static final class Builder<K, V> {
+    public static final class Builder<K, V> {
 
-        private Executor executor;
         private RxCache<K, V> delegate;
 
         private Class<K> keyType;
         private Class<V> valueType;
 
-        private Scheduler scheduler;
-
         private Builder(){
         }
 
         private Builder(Builder<K, V> proto){
-            this.executor = proto.executor;
             this.delegate = proto.delegate;
             this.keyType = proto.keyType;
             this.valueType = proto.valueType;
-            this.scheduler = proto.scheduler;
-        }
-
-        public Builder<K, V> setExecutor(Executor executor) {
-            this.executor = executor;
-            return this;
         }
 
         public Builder<K, V> setDelegate(RxCache<K, V> delegate) {
@@ -105,19 +92,13 @@ public class AsyncCacheWrapper<K, V> implements AsyncCache<K, V> {
             return this;
         }
 
-        public AsyncCacheWrapper<K, V> build(){
+        public FutureCacheWrapper<K, V> build(){
 
-            checkNotNull(delegate, "Delegate cannot be null");
-            checkNotNull(keyType, "Key type cannot be null");
-            checkNotNull(valueType, "Value type cannot be null");
+            checkArgument(keyType, "Key type cannot be null");
+            checkArgument(valueType, "Value type cannot be null");
+            checkArgument(delegate, "Delegate cannot be null");
 
-            if(executor == null){
-                scheduler = Schedulers.immediate();
-            } else {
-                scheduler = Schedulers.from(executor);
-            }
-
-            return new AsyncCacheWrapper<>(this);
+            return new FutureCacheWrapper<>(this);
         }
     }
 }

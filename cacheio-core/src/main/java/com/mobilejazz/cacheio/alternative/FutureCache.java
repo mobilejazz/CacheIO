@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-public interface AsyncCache<K, V> {
+public interface FutureCache<K, V> {
 
     Future<V> get(K key);
 
