@@ -21,9 +21,9 @@ import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class StringKeyMapperTest {
+public class ShortKeyMapperTest {
 
-  private final KeyMapper<String> mapper = new StringKeyMapper();
+  private final KeyMapper<Short> mapper = new ShortKeyMapper();
 
   @Test(expected = IllegalArgumentException.class) @SuppressWarnings("ResultOfMethodCallIgnored")
   public void shouldThrowIllegalArgumentExceptionIfMappingToStringWithNullValue() {
@@ -36,14 +36,14 @@ public class StringKeyMapperTest {
   }
 
   @Test public void shouldMappingToStringAValue() throws Exception {
-    String result = mapper.toString("1");
+    String result = mapper.toString((short) 1);
 
     assertThat(result).isEqualTo("1");
   }
 
   @Test public void shouldMappingFromStringAValue() throws Exception {
-    String result = mapper.fromString("1");
+    Short result = mapper.fromString(String.valueOf(Short.MIN_VALUE));
 
-    assertThat(result).isEqualTo("1");
+    assertThat(result).isEqualTo(Short.MIN_VALUE);
   }
 }
