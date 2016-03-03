@@ -75,13 +75,8 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
   }
 
   @Override public Single<Map<K, V>> getAll(final Collection<K> keys) {
-
-    return Single.create(new Single.OnSubscribe<Map<K, V>>() {
-      @Override public void call(SingleSubscriber<? super Map<K, V>> subscriber) {
-        config.executor.submit(new GetAll(keys, subscriber));
-      }
-    });
-
+    final Future<Map<K, V>> future = config.executor.submit(new GetAll(keys));
+    return Single.from(future);
   }
 
   @Override public Single<V> put(final K key, V value, long expiry, TimeUnit unit) {
@@ -99,13 +94,8 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
 
   @Override
   public Single<Map<K, V>> putAll(final Map<K, V> map, final long expiry, final TimeUnit unit) {
-
-    return Single.create(new Single.OnSubscribe<Map<K, V>>() {
-      @Override public void call(SingleSubscriber<? super Map<K, V>> subscriber) {
-        config.executor.submit(new PutAll(map, expiry, unit, subscriber));
-      }
-    });
-
+    final Future<Map<K, V>> future = config.executor.submit(new PutAll(map, expiry, unit));
+    return Single.from(future);
   }
 
   @Override public Single<K> remove(K key) {
@@ -123,11 +113,8 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
 
   @Override public Single<Collection<K>> removeAll(final Collection<K> keys) {
 
-    return Single.create(new Single.OnSubscribe<Collection<K>>() {
-      @Override public void call(SingleSubscriber<? super Collection<K>> subscriber) {
-        config.executor.submit(new RemoveAll(keys, subscriber));
-      }
-    });
+    final Future<Collection<K>> future = config.executor.submit(new RemoveAll(keys));
+    return Single.from(future);
 
   }
 
@@ -148,89 +135,77 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
     return result;
   }
 
-  private final class GetAll implements Runnable {
+  private final class GetAll implements Callable<Map<K, V>> {
 
     private final Collection<K> keys;
-    private final SingleSubscriber<? super Map<K, V>> subscriber;
 
     private final Date now = new Date();
 
-    public GetAll(Collection<K> keys, SingleSubscriber<? super Map<K, V>> subscriber) {
+    public GetAll(Collection<K> keys) {
       this.keys = keys;
-      this.subscriber = subscriber;
     }
 
-    @Override public void run() {
+    @Override public Map<K, V> call() throws Exception {
+      final String timeStr = Long.toString(now.getTime());
 
-      try {
+      final String sql = "SELECT * FROM "
+          + config.tableName
+          + " WHERE "
+          + COLUMN_EXPIRES
+          + " > ? AND "
+          + COLUMN_KEY
+          + " IN ("
+          + generatePlaceholders(keys.size())
+          + ")";
 
-        final String timeStr = Long.toString(now.getTime());
+      final String[] keysAsStrings = keysAsString(keys);
+      final String[] args = new String[keysAsStrings.length + 1];
+      args[0] = timeStr;
 
-        final String sql = "SELECT * FROM "
-            + config.tableName
-            + " WHERE "
-            + COLUMN_EXPIRES
-            + " > ? AND "
-            + COLUMN_KEY
-            + " IN ("
-            + generatePlaceholders(keys.size())
-            + ")";
+      System.arraycopy(keysAsStrings, 0, args, 1, keysAsStrings.length);
 
-        final String[] keysAsStrings = keysAsString(keys);
-        final String[] args = new String[keysAsStrings.length + 1];
-        args[0] = timeStr;
+      final ValueMapper valueValueMapper = config.valueMapper;
 
-        System.arraycopy(keysAsStrings, 0, args, 1, keysAsStrings.length);
+      final Cursor cursor = config.db.rawQuery(sql, args);
 
-        final ValueMapper valueValueMapper = config.valueMapper;
+      final Map<K, V> result = new HashMap<>();
 
-        final Cursor cursor = config.db.rawQuery(sql, args);
+      while (cursor.moveToNext()) {
 
-        final Map<K, V> result = new HashMap<>();
+        final String keyString = cursor.getString(cursor.getColumnIndex(COLUMN_KEY));
+        final byte[] blob = cursor.getBlob(cursor.getColumnIndex(COLUMN_VALUE));
 
-        while (cursor.moveToNext()) {
+        final ByteArrayInputStream bytesIn = new ByteArrayInputStream(blob);
 
-          final String keyString = cursor.getString(cursor.getColumnIndex(COLUMN_KEY));
-          final byte[] blob = cursor.getBlob(cursor.getColumnIndex(COLUMN_VALUE));
+        final K key = config.keyMapper.fromString(keyString);
+        final V value = valueValueMapper.read(config.valueType, bytesIn);
 
-          final ByteArrayInputStream bytesIn = new ByteArrayInputStream(blob);
+        result.put(key, value);
 
-          final K key = config.keyMapper.fromString(keyString);
-          final V value = valueValueMapper.read(config.valueType, bytesIn);
-
-          result.put(key, value);
-
-        }
-
-        cursor.close();
-
-        subscriber.onSuccess(result);
-
-      } catch (Throwable t) {
-        subscriber.onError(t);
       }
 
+      cursor.close();
+
+      return result;
     }
+
   }
 
-  private final class PutAll implements Runnable {
+  private final class PutAll implements Callable<Map<K, V>> {
 
     private final Map<K, V> map;
     private final long expiry;
     private final TimeUnit expiryUnit;
-    private final SingleSubscriber<? super Map<K, V>> subscriber;
 
     private final Date now = new Date();
 
-    public PutAll(Map<K, V> map, long expiry, TimeUnit expiryUnit, SingleSubscriber<? super Map<K, V>> subscriber) {
+    public PutAll(Map<K, V> map, long expiry, TimeUnit expiryUnit) {
       this.map = map;
       this.expiry = expiry;
       this.expiryUnit = expiryUnit;
-      this.subscriber = subscriber;
     }
 
-    @Override public void run() {
-
+    @Override public Map<K, V> call() throws Exception {
       final SQLiteDatabase db = config.db;
       final KeyMapper<K> keyMapper = config.keyMapper;
       final VersionMapper<V> versionMapper = config.versionMapper;
@@ -309,30 +284,26 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
 
         db.setTransactionSuccessful();
 
-        subscriber.onSuccess(result);
+        return result;
 
-      } catch (Throwable t) {
-        subscriber.onError(t);
       } finally {
         db.endTransaction();
       }
-
     }
+
   }
 
-  private final class RemoveAll implements Runnable {
+  private final class RemoveAll implements Callable<Collection<K>> {
 
     private final Collection<K> keys;
-    private final SingleSubscriber<? super Collection<K>> subscriber;
 
     private final Date now = new Date();
 
-    public RemoveAll(Collection<K> keys, SingleSubscriber<? super Collection<K>> subscriber) {
+    public RemoveAll(Collection<K> keys) {
       this.keys = keys;
-      this.subscriber = subscriber;
     }
 
-    @Override public void run() {
+    @Override public Collection<K> call() throws Exception {
 
       final SQLiteDatabase db = config.db;
 
@@ -351,12 +322,11 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
         db.execSQL(sql, keysAsString(keys));
 
         db.setTransactionSuccessful();
+
+        return keys;
+
+      } finally {
         db.endTransaction();
-
-        subscriber.onSuccess(keys);
-
-      } catch (Throwable t) {
-        subscriber.onError(t);
       }
 
     }
