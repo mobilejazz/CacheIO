@@ -45,6 +45,7 @@ import rx.Single;
 import rx.SingleSubscriber;
 import rx.functions.Func1;
 
+import static com.mobilejazz.cacheio.internal.helper.Preconditions.checkArgument;
 import static com.mobilejazz.cacheio.internal.helper.Preconditions.checkNotNull;
 
 public class SQLiteRxCache<K, V> implements RxCache<K, V> {
@@ -390,7 +391,7 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
     private ValueMapper valueMapper;
     private VersionMapper<V> versionMapper;
 
-    private ExecutorService executor;
+    private Executor executor;
 
     private Builder() {
     }
@@ -413,7 +414,7 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
       return this;
     }
 
-    public Builder<K, V> setScheduler(ExecutorService executor) {
+    public Builder<K, V> setExecutor(Executor executor) {
       this.executor = executor;
       return this;
     }
@@ -423,12 +424,12 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
       return this;
     }
 
-    protected Builder<K, V> setKeyType(Class<K> keyType) {
+    private Builder<K, V> setKeyType(Class<K> keyType) {
       this.keyType = keyType;
       return this;
     }
 
-    protected Builder<K, V> setValueType(Class<V> valueType) {
+    private Builder<K, V> setValueType(Class<V> valueType) {
       this.valueType = valueType;
       return this;
     }
@@ -457,35 +458,20 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
 
       // defaults
       if (this.tableName == null) {
-        this.tableName = valueType.getCanonicalName().replaceAll(".", "_");
-      }
-
-      if (keyMapper == null) {
-
-        if (keyType == String.class) {
-          keyMapper = (KeyMapper<K>) new StringKeyMapper();
-        } else if (keyType == Integer.class) {
-          keyMapper = (KeyMapper<K>) new IntegerKeyMapper();
-        } else if (keyType == int.class) {
-          keyMapper = (KeyMapper<K>) new IntegerKeyMapper();
-        } else if (keyType == Long.class) {
-          keyMapper = (KeyMapper<K>) new LongKeyMapper();
-        } else if (keyType == long.class) {
-          keyMapper = (KeyMapper<K>) new LongKeyMapper();
-        }
-
+        this.tableName = valueType.getName().replaceAll("\\.", "_");
       }
 
       // assertions
-      checkNotNull(context, "Context cannot be null");
-      checkNotNull(databaseName, "Database name cannot be null");
-      checkNotNull(keyType, "Key type cannot be null");
-      checkNotNull(valueType, "Value type cannot be null");
-      checkNotNull(tableName, "Table name cannot be null");
-      checkNotNull(keyMapper, "Key mapper cannot be null");
-      checkNotNull(valueMapper, "Mapping context cannot be null");
-      checkNotNull(executor, "Executor cannot be null");
-      checkNotNull(versionMapper, "Version mapper cannot be null");
+      checkArgument(context, "Context cannot be null");
+      checkArgument(databaseName, "Database name cannot be null");
+      checkArgument(keyType, "Key type cannot be null");
+      checkArgument(valueType, "Value type cannot be null");
+      checkArgument(tableName, "Table name cannot be null");
+      checkArgument(keyMapper, "Key mapper cannot be null");
+      checkArgument(valueMapper, "Mapping context cannot be null");
+      checkArgument(executor, "Executor cannot be null");
+      checkArgument(versionMapper, "Version mapper cannot be null");
+      checkArgument(tableName, "Table name cannot be null");
 
       //
       final DbHelper dbHelper = new DbHelper(context, databaseName, tableName);

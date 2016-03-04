@@ -22,6 +22,7 @@ public class FutureCacheWrapper<K, V> implements FutureCache<K, V> {
     }
 
     private <T> Future<T> future(Single<T> single){
+        // TODO find a cleaner way of doing this
         return single.toObservable().toBlocking().toFuture();
     }
 
