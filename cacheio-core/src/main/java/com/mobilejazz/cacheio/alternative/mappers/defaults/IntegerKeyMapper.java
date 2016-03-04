@@ -6,9 +6,9 @@ import static com.mobilejazz.cacheio.internal.helper.Preconditions.checkArgument
 
 public class IntegerKeyMapper implements KeyMapper<Integer> {
 
-  @Override public String toString(Integer key) {
-    checkArgument(key, "key cannot be null");
-    return key.toString();
+  @Override public String toString(Integer model) {
+    checkArgument(model, "key cannot be null");
+    return model.toString();
   }
 
   @Override public Integer fromString(String str) {

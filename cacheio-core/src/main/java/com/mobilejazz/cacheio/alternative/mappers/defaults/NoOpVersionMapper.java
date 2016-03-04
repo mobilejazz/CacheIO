@@ -16,19 +16,14 @@
 
 package com.mobilejazz.cacheio.alternative.mappers.defaults;
 
-import com.mobilejazz.cacheio.alternative.mappers.KeyMapper;
+import com.mobilejazz.cacheio.alternative.mappers.VersionMapper;
 
-import static com.mobilejazz.cacheio.internal.helper.Preconditions.checkArgument;
+/**
+ * Created by bmcgee on 04/03/2016.
+ */
+public class NoOpVersionMapper<T> implements VersionMapper<T> {
 
-public class FloatKeyMapper implements KeyMapper<Float> {
-
-  @Override public String toString(Float model) {
-    checkArgument(model, "key cannot be null");
-    return model.toString();
-  }
-
-  @Override public Float fromString(String str) {
-    checkArgument(str, "str cannot be null");
-    return Float.parseFloat(str);
+  @Override public long getVersion(T model) {
+    return 0L;
   }
 }

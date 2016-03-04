@@ -22,9 +22,9 @@ import static com.mobilejazz.cacheio.internal.helper.Preconditions.checkArgument
 
 public class DoubleKeyMapper implements KeyMapper<Double> {
 
-  @Override public String toString(Double key) {
-    checkArgument(key, "key cannot be null");
-    return key.toString();
+  @Override public String toString(Double model) {
+    checkArgument(model, "key cannot be null");
+    return model.toString();
   }
 
   @Override public Double fromString(String str) {

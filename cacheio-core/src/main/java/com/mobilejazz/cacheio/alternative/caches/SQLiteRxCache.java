@@ -21,32 +21,19 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-
 import com.mobilejazz.cacheio.alternative.RxCache;
 import com.mobilejazz.cacheio.alternative.mappers.KeyMapper;
 import com.mobilejazz.cacheio.alternative.mappers.ValueMapper;
 import com.mobilejazz.cacheio.alternative.mappers.VersionMapper;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.*;
-
-import com.mobilejazz.cacheio.alternative.mappers.defaults.IntegerKeyMapper;
-import com.mobilejazz.cacheio.alternative.mappers.defaults.LongKeyMapper;
-import com.mobilejazz.cacheio.alternative.mappers.defaults.StringKeyMapper;
 import rx.Single;
 import rx.SingleSubscriber;
 import rx.functions.Func1;
 
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.*;
+
 import static com.mobilejazz.cacheio.internal.helper.Preconditions.checkArgument;
-import static com.mobilejazz.cacheio.internal.helper.Preconditions.checkNotNull;
 
 public class SQLiteRxCache<K, V> implements RxCache<K, V> {
 
@@ -179,7 +166,7 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
             + config.tableName
             + " WHERE "
             + COLUMN_EXPIRES
-            + " > ? AND "
+            + " >= ? AND "
             + COLUMN_KEY
             + " IN ("
             + generatePlaceholders(keys.size())
@@ -215,7 +202,7 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
 
         subscriber.onSuccess(result);
 
-      } catch(Throwable t){
+      } catch (Throwable t) {
         subscriber.onError(t);
       }
     }
@@ -251,31 +238,37 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
         final Map<K, V> result = new HashMap<>(map.size());
 
         final long createdAt = now.getTime();
-        final long expiresAt = createdAt + expiryUnit.toMillis(expiry);
+        final long expiresAt =
+            expiry == Long.MAX_VALUE ? expiry : createdAt + expiryUnit.toMillis(expiry);
 
         db.beginTransaction();
 
         final Set<K> keys = map.keySet();
-        final Set<K> keysToUpdate = new HashSet<K>(keys.size());
+        final Set<K> keysToUpdate = new HashSet<>(keys);
 
-        for (K key : keys) {
+        final String versionSql = "SELECT " + COLUMN_KEY + ", " + COLUMN_VERSION + " FROM " +
+            config.tableName + " WHERE key in (" + generatePlaceholders(keys.size()) + ")";
+
+        final Cursor versionCursor =
+            config.db.rawQuery(versionSql, keysAsString(keys));
+
+        // determine based on version which keys we should update
+
+        while(versionCursor.moveToNext()){
+
+          final K key = keyMapper.fromString(versionCursor.getString(versionCursor.getColumnIndex(COLUMN_KEY)));
+          final long version = versionCursor.getLong(versionCursor.getColumnIndex(COLUMN_VERSION));
 
           final V value = map.get(key);
-          final String keyStr = keyMapper.toString(key);
-          final String versionStr = Long.toString(versionMapper.getVersion(value));
 
-          final Cursor cursor =
-              db.query(config.tableName, new String[] { COLUMN_KEY }, "key = ? AND version > ?",
-                  new String[] { keyStr, versionStr }, null, null, null, null);
-
-          if (cursor.getCount() == 0) {
-            // we have the latest version and need to update
-            keysToUpdate.add(key);
+          if(versionMapper.getVersion(value) > version){
+            keysToUpdate.remove(key);
           }
-
-          cursor.close();
-
         }
+
+        versionCursor.close();
+
+        // update
 
         if (keysToUpdate.size() > 0) {
 
@@ -321,7 +314,7 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
 
         subscriber.onSuccess(result);
 
-      } catch(Throwable t){
+      } catch (Throwable t) {
         subscriber.onError(t);
       } finally {
         db.endTransaction();
@@ -362,7 +355,7 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
 
         subscriber.onSuccess(keys);
 
-      } catch(Throwable t){
+      } catch (Throwable t) {
         subscriber.onError(t);
       } finally {
         db.endTransaction();

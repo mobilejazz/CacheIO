@@ -22,9 +22,9 @@ import static com.mobilejazz.cacheio.internal.helper.Preconditions.checkArgument
 
 public class ShortKeyMapper implements KeyMapper<Short> {
 
-  @Override public String toString(Short key) {
-    checkArgument(key, "key cannot be null");
-    return key.toString();
+  @Override public String toString(Short model) {
+    checkArgument(model, "key cannot be null");
+    return model.toString();
   }
 
   @Override public Short fromString(String str) {

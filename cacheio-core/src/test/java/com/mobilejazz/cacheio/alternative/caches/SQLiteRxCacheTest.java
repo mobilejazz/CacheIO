@@ -18,13 +18,20 @@ package com.mobilejazz.cacheio.alternative.caches;
 
 import android.content.Context;
 import com.mobilejazz.cacheio.ApplicationTestCase;
+import com.mobilejazz.cacheio.alternative.RxCache;
 import com.mobilejazz.cacheio.alternative.mappers.KeyMapper;
 import com.mobilejazz.cacheio.alternative.mappers.ValueMapper;
 import com.mobilejazz.cacheio.alternative.mappers.VersionMapper;
+import com.mobilejazz.cacheio.alternative.mappers.defaults.NoOpVersionMapper;
+import com.mobilejazz.cacheio.alternative.mappers.defaults.StringKeyMapper;
+import com.mobilejazz.cacheio.alternative.wrappers.FutureCacheWrapper;
+import com.mobilejazz.cacheio.alternative.wrappers.SyncCacheWrapper;
 import org.junit.Test;
+import org.robolectric.RuntimeEnvironment;
 
 import java.util.concurrent.*;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 public class SQLiteRxCacheTest extends ApplicationTestCase {
@@ -101,5 +108,58 @@ public class SQLiteRxCacheTest extends ApplicationTestCase {
         .build();
   }
 
+  @Test public void testBasicCRUDWithNoVersioning() {
+
+    final TestValueMapper valueMapper = new TestValueMapper();
+    final ExecutorService executor = Executors.newSingleThreadExecutor();
+
+    final RxCache<String, TestUser> rxCache = SQLiteRxCache.newBuilder(String.class, TestUser.class)
+        .setContext(RuntimeEnvironment.application)
+        .setDatabaseName("rxcache_test")
+        .setKeyMapper(new StringKeyMapper())
+        .setValueMapper(valueMapper)
+        .setVersionMapper(new NoOpVersionMapper<TestUser>())
+        .setExecutor(executor)
+        .setTableName("TestUser")
+        .build();
+
+    final FutureCacheWrapper<String, TestUser> futureCache =
+        FutureCacheWrapper.newBuilder(String.class, TestUser.class).setDelegate(rxCache).build();
+
+    final SyncCacheWrapper<String, TestUser> cache =
+        SyncCacheWrapper.newBuilder(String.class, TestUser.class).setDelegate(futureCache).build();
+
+    // insert
+
+    final TestUser mal =
+        new TestUser().setEmail("mal@email.com").setFirstName("Malcolm").setLastName("Reynolds");
+
+    final TestUser castle =
+        new TestUser().setEmail("castle@email.com").setFirstName("Richard").setLastName("Castle");
+
+    final TestUser bruce =
+        new TestUser().setEmail("bruce@email.com").setFirstName("Bruce").setLastName("Banner");
+
+    assertThat(cache.put(mal.getEmail(), mal, Long.MAX_VALUE, TimeUnit.SECONDS)).isEqualTo(mal);
+    assertThat(cache.put(castle.getEmail(), castle, Long.MAX_VALUE, TimeUnit.SECONDS)).isEqualTo(castle);
+    assertThat(cache.put(bruce.getEmail(), bruce, Long.MAX_VALUE, TimeUnit.SECONDS)).isEqualTo(bruce);
+
+    assertThat(cache.get(mal.getEmail())).isEqualTo(mal);
+    assertThat(cache.get(castle.getEmail())).isEqualTo(castle);
+    assertThat(cache.get(bruce.getEmail())).isEqualTo(bruce);
+
+    // update
+
+    mal.setLastName("Foo");
+
+    assertThat(cache.put(mal.getEmail(), mal, Long.MAX_VALUE, TimeUnit.SECONDS)).isEqualTo(mal);
+    assertThat(cache.get(mal.getEmail())).isEqualTo(mal);
+
+    // delete
+
+    assertThat(cache.remove(mal.getEmail())).isEqualTo(mal.getEmail());
+    assertThat(cache.get(mal.getEmail())).isNull();
+
+  }
 
 }
