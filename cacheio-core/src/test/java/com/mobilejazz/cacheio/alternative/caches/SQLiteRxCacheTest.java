@@ -162,7 +162,7 @@ public class SQLiteRxCacheTest extends ApplicationTestCase {
 
   }
 
-  @Test public void testExpiryOfValues() throws InterruptedException {
+  @Test public void testExpiryOfValuesWithNoVersioning() throws InterruptedException {
 
     final TestValueMapper valueMapper = new TestValueMapper();
     final ExecutorService executor = Executors.newSingleThreadExecutor();

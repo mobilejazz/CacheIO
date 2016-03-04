@@ -18,9 +18,6 @@ package com.mobilejazz.cacheio.alternative.mappers.defaults;
 
 import com.mobilejazz.cacheio.alternative.mappers.VersionMapper;
 
-/**
- * Created by bmcgee on 04/03/2016.
- */
 public class NoOpVersionMapper<T> implements VersionMapper<T> {
 
   @Override public long getVersion(T model) {
