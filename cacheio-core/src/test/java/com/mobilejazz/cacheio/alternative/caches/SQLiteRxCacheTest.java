@@ -162,4 +162,43 @@ public class SQLiteRxCacheTest extends ApplicationTestCase {
 
   }
 
+  @Test public void testExpiryOfValues() throws InterruptedException {
+
+    final TestValueMapper valueMapper = new TestValueMapper();
+    final ExecutorService executor = Executors.newSingleThreadExecutor();
+
+    final RxCache<String, TestUser> rxCache = SQLiteRxCache.newBuilder(String.class, TestUser.class)
+        .setContext(RuntimeEnvironment.application)
+        .setDatabaseName("rxcache_test")
+        .setKeyMapper(new StringKeyMapper())
+        .setValueMapper(valueMapper)
+        .setVersionMapper(new NoOpVersionMapper<TestUser>())
+        .setExecutor(executor)
+        .setTableName("TestUser")
+        .build();
+
+    final FutureCacheWrapper<String, TestUser> futureCache =
+        FutureCacheWrapper.newBuilder(String.class, TestUser.class).setDelegate(rxCache).build();
+
+    final SyncCacheWrapper<String, TestUser> cache =
+        SyncCacheWrapper.newBuilder(String.class, TestUser.class).setDelegate(futureCache).build();
+
+    // insert
+
+    final TestUser mal =
+        new TestUser().setEmail("mal@email.com").setFirstName("Malcolm").setLastName("Reynolds");
+
+    assertThat(cache.put(mal.getEmail(), mal, 2, TimeUnit.SECONDS)).isEqualTo(mal);
+    assertThat(cache.get(mal.getEmail())).isEqualTo(mal);
+
+    // Wait to see it's still returning after a little while
+    Thread.sleep(1000);
+    assertThat(cache.get(mal.getEmail())).isEqualTo(mal);
+
+    // Wait again and check it is no longer being returned as it should have expired
+    Thread.sleep(2000);
+    assertThat(cache.get(mal.getEmail())).isNull();
+
+  }
+
 }
