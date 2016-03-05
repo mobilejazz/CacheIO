@@ -422,10 +422,6 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
       return this;
     }
 
-    public Class<K> getKeyType() {
-      return keyType;
-    }
-
     private Builder<K, V> setKeyType(Class<K> keyType) {
       this.keyType = keyType;
       return this;
@@ -434,10 +430,6 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
     private Builder<K, V> setValueType(Class<V> valueType) {
       this.valueType = valueType;
       return this;
-    }
-
-    public Class<V> getValueType() {
-      return valueType;
     }
 
     public Builder<K, V> setTableName(String tableName) {
