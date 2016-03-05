@@ -118,7 +118,7 @@ public class SQLiteRxCacheTest extends ApplicationTestCase {
         .setDatabaseName("rxcache_test")
         .setKeyMapper(new StringKeyMapper())
         .setValueMapper(valueMapper)
-        .setVersionMapper(new NoOpVersionMapper<TestUser>())
+        .setVersionMapper(new TestUserVersionMapper())
         .setExecutor(executor)
         .setTableName("TestUser")
         .build();
@@ -172,7 +172,7 @@ public class SQLiteRxCacheTest extends ApplicationTestCase {
         .setDatabaseName("rxcache_test")
         .setKeyMapper(new StringKeyMapper())
         .setValueMapper(valueMapper)
-        .setVersionMapper(new NoOpVersionMapper<TestUser>())
+        .setVersionMapper(new TestUserVersionMapper())
         .setExecutor(executor)
         .setTableName("TestUser")
         .build();
@@ -199,6 +199,46 @@ public class SQLiteRxCacheTest extends ApplicationTestCase {
     Thread.sleep(2000);
     assertThat(cache.get(mal.getEmail())).isNull();
 
+  }
+
+  @Test public void testPutsWithAnOlderVersionAreIgnored() {
+
+    final TestValueMapper valueMapper = new TestValueMapper();
+    final ExecutorService executor = Executors.newSingleThreadExecutor();
+
+    final RxCache<String, TestUser> rxCache = SQLiteRxCache.newBuilder(String.class, TestUser.class)
+        .setContext(RuntimeEnvironment.application)
+        .setDatabaseName("rxcache_test")
+        .setKeyMapper(new StringKeyMapper())
+        .setValueMapper(valueMapper)
+        .setVersionMapper(new TestUserVersionMapper())
+        .setExecutor(executor)
+        .setTableName("TestUser")
+        .build();
+
+    final FutureCacheWrapper<String, TestUser> futureCache =
+        FutureCacheWrapper.newBuilder(String.class, TestUser.class).setDelegate(rxCache).build();
+
+    final SyncCacheWrapper<String, TestUser> cache =
+        SyncCacheWrapper.newBuilder(String.class, TestUser.class).setDelegate(futureCache).build();
+
+    //
+
+    final TestUser mal = new TestUser()
+        .setEmail("mal@email.com")
+        .setFirstName("Malcolm")
+        .setLastName("Reynolds")
+        .setVersion(3L);
+
+    assertThat(cache.put(mal.getEmail(), mal, Long.MAX_VALUE, TimeUnit.SECONDS)).isEqualTo(mal);
+
+    // attempt to write an older version
+    mal.setVersion(2L);
+    assertThat(cache.put(mal.getEmail(), mal, Long.MAX_VALUE, TimeUnit.SECONDS)).isNull();
+
+    // attempt to write a newer version
+    mal.setVersion(4L);
+    assertThat(cache.put(mal.getEmail(), mal, Long.MAX_VALUE, TimeUnit.SECONDS)).isEqualTo(mal);
   }
 
 }

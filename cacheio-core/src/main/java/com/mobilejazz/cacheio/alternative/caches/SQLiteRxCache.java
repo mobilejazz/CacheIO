@@ -25,6 +25,7 @@ import com.mobilejazz.cacheio.alternative.RxCache;
 import com.mobilejazz.cacheio.alternative.mappers.KeyMapper;
 import com.mobilejazz.cacheio.alternative.mappers.ValueMapper;
 import com.mobilejazz.cacheio.alternative.mappers.VersionMapper;
+import com.mobilejazz.cacheio.alternative.mappers.defaults.NoOpVersionMapper;
 import rx.Single;
 import rx.SingleSubscriber;
 import rx.functions.Func1;
@@ -261,9 +262,13 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
 
           final V value = map.get(key);
 
-          if(versionMapper.getVersion(value) > version){
+          final long valueVersion = versionMapper.getVersion(value);
+
+          if(valueVersion != NoOpVersionMapper.UNVERSIONED && versionMapper.getVersion(value) < version){
+            // attempting to overwrite a newer version so remove the key from the update list
             keysToUpdate.remove(key);
           }
+
         }
 
         versionCursor.close();
@@ -311,13 +316,13 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
         }
 
         db.setTransactionSuccessful();
+        db.endTransaction();
 
         subscriber.onSuccess(result);
 
       } catch (Throwable t) {
-        subscriber.onError(t);
-      } finally {
         db.endTransaction();
+        subscriber.onError(t);
       }
     }
 
@@ -352,13 +357,13 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
         db.execSQL(sql, keysAsString(keys));
 
         db.setTransactionSuccessful();
+        db.endTransaction();
 
         subscriber.onSuccess(keys);
 
       } catch (Throwable t) {
-        subscriber.onError(t);
-      } finally {
         db.endTransaction();
+        subscriber.onError(t);
       }
 
     }
