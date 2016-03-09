@@ -14,13 +14,13 @@
  *  limitations under the License.
  */
 
-package com.mobilejazz.cacheio.alternative.mappers.defaults;
+package com.mobilejazz.cacheio.alternative.caches;
 
 import com.mobilejazz.cacheio.alternative.mappers.VersionMapper;
 
-public class NoOpVersionMapper<T> implements VersionMapper<T> {
+public class TestUserVersionMapper implements VersionMapper<TestUser> {
 
-  @Override public long getVersion(T model) {
-    return UNVERSIONED;
+  @Override public long getVersion(TestUser model) {
+    return model.getVersion();
   }
 }
