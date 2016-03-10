@@ -22,18 +22,14 @@ import com.mobilejazz.cacheio.alternative.RxCache;
 import com.mobilejazz.cacheio.alternative.mappers.KeyMapper;
 import com.mobilejazz.cacheio.alternative.mappers.ValueMapper;
 import com.mobilejazz.cacheio.alternative.mappers.VersionMapper;
-import com.mobilejazz.cacheio.alternative.mappers.defaults.NoOpVersionMapper;
-import com.mobilejazz.cacheio.alternative.mappers.defaults.StringKeyMapper;
+import com.mobilejazz.cacheio.alternative.mappers.value.StringKeyMapper;
 import com.mobilejazz.cacheio.alternative.wrappers.FutureCacheWrapper;
 import com.mobilejazz.cacheio.alternative.wrappers.SyncCacheWrapper;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.robolectric.RuntimeEnvironment;
 
-import java.util.*;
 import java.util.concurrent.*;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package com.mobilejazz.cacheio.alternative.mappers.defaults;
+package com.mobilejazz.cacheio.alternative.mappers.value;
 
 import com.mobilejazz.cacheio.alternative.mappers.KeyMapper;
 

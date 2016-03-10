@@ -23,7 +23,7 @@ import com.mobilejazz.cacheio.alternative.RxCache;
 import com.mobilejazz.cacheio.alternative.mappers.KeyMapper;
 import com.mobilejazz.cacheio.alternative.mappers.ValueMapper;
 import com.mobilejazz.cacheio.alternative.mappers.VersionMapper;
-import com.mobilejazz.cacheio.alternative.mappers.defaults.NoOpVersionMapper;
+import com.mobilejazz.cacheio.alternative.mappers.version.NoOpVersionMapper;
 import rx.Single;
 import rx.SingleSubscriber;
 import rx.functions.Func1;

@@ -17,18 +17,7 @@
 package com.mobilejazz.cacheio.alternative;
 
 import com.mobilejazz.cacheio.ApplicationTestCase;
-import com.mobilejazz.cacheio.alternative.caches.TestUser;
-import com.mobilejazz.cacheio.alternative.caches.TestValueMapper;
-import com.mobilejazz.cacheio.alternative.mappers.ValueMapper;
-import com.mobilejazz.cacheio.alternative.mappers.defaults.StringKeyMapper;
-import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.robolectric.RuntimeEnvironment;
-import rx.Single;
-import rx.functions.Action1;
-
-import java.io.*;
-import java.util.concurrent.*;
 
 public class CacheIOTests extends ApplicationTestCase {
 

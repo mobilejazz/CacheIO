@@ -21,12 +21,12 @@ import com.mobilejazz.cacheio.alternative.caches.SQLiteRxCache;
 import com.mobilejazz.cacheio.alternative.mappers.KeyMapper;
 import com.mobilejazz.cacheio.alternative.mappers.ValueMapper;
 import com.mobilejazz.cacheio.alternative.mappers.VersionMapper;
-import com.mobilejazz.cacheio.alternative.mappers.defaults.DoubleKeyMapper;
-import com.mobilejazz.cacheio.alternative.mappers.defaults.FloatKeyMapper;
-import com.mobilejazz.cacheio.alternative.mappers.defaults.IntegerKeyMapper;
-import com.mobilejazz.cacheio.alternative.mappers.defaults.LongKeyMapper;
-import com.mobilejazz.cacheio.alternative.mappers.defaults.ShortKeyMapper;
-import com.mobilejazz.cacheio.alternative.mappers.defaults.StringKeyMapper;
+import com.mobilejazz.cacheio.alternative.mappers.value.DoubleKeyMapper;
+import com.mobilejazz.cacheio.alternative.mappers.value.FloatKeyMapper;
+import com.mobilejazz.cacheio.alternative.mappers.value.IntegerKeyMapper;
+import com.mobilejazz.cacheio.alternative.mappers.value.LongKeyMapper;
+import com.mobilejazz.cacheio.alternative.mappers.value.ShortKeyMapper;
+import com.mobilejazz.cacheio.alternative.mappers.value.StringKeyMapper;
 import com.mobilejazz.cacheio.alternative.wrappers.FutureCacheWrapper;
 
 import java.util.*;

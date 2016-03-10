@@ -14,9 +14,10 @@
  *  limitations under the License.
  */
 
-package com.mobilejazz.cacheio.alternative.mappers.defaults;
+package com.mobilejazz.cacheio.alternative.mappers.value.defaults;
 
 import com.mobilejazz.cacheio.alternative.mappers.KeyMapper;
+import com.mobilejazz.cacheio.alternative.mappers.value.LongKeyMapper;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

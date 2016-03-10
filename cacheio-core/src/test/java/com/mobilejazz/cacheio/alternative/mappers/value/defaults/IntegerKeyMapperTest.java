@@ -14,16 +14,17 @@
  *  limitations under the License.
  */
 
-package com.mobilejazz.cacheio.alternative.mappers.defaults;
+package com.mobilejazz.cacheio.alternative.mappers.value.defaults;
 
 import com.mobilejazz.cacheio.alternative.mappers.KeyMapper;
+import com.mobilejazz.cacheio.alternative.mappers.value.IntegerKeyMapper;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class FloatKeyMapperTest {
+public class IntegerKeyMapperTest {
 
-  private final KeyMapper<Float> mapper = new FloatKeyMapper();
+  private final KeyMapper<Integer> mapper = new IntegerKeyMapper();
 
   @Test(expected = IllegalArgumentException.class) @SuppressWarnings("ResultOfMethodCallIgnored")
   public void shouldThrowIllegalArgumentExceptionIfMappingToStringWithNullValue() {
@@ -36,14 +37,14 @@ public class FloatKeyMapperTest {
   }
 
   @Test public void shouldMappingToStringAValue() throws Exception {
-    String result = mapper.toString(1f);
+    String result = mapper.toString(1);
 
-    assertThat(result).isEqualTo("1.0");
+    assertThat(result).isEqualTo("1");
   }
 
   @Test public void shouldMappingFromStringAValue() throws Exception {
-    Float result = mapper.fromString("1.0");
+    Integer result = mapper.fromString("1");
 
-    assertThat(result).isEqualTo(1f);
+    assertThat(result).isEqualTo(1);
   }
 }

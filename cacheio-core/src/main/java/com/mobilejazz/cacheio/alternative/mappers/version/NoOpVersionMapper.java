@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package com.mobilejazz.cacheio.alternative.mappers.defaults;
+package com.mobilejazz.cacheio.alternative.mappers.version;
 
 import com.mobilejazz.cacheio.alternative.mappers.VersionMapper;
 
