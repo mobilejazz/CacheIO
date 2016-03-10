@@ -21,8 +21,11 @@ import com.mobilejazz.cacheio.alternative.caches.SQLiteRxCache;
 import com.mobilejazz.cacheio.alternative.mappers.KeyMapper;
 import com.mobilejazz.cacheio.alternative.mappers.ValueMapper;
 import com.mobilejazz.cacheio.alternative.mappers.VersionMapper;
+import com.mobilejazz.cacheio.alternative.mappers.defaults.DoubleKeyMapper;
+import com.mobilejazz.cacheio.alternative.mappers.defaults.FloatKeyMapper;
 import com.mobilejazz.cacheio.alternative.mappers.defaults.IntegerKeyMapper;
 import com.mobilejazz.cacheio.alternative.mappers.defaults.LongKeyMapper;
+import com.mobilejazz.cacheio.alternative.mappers.defaults.ShortKeyMapper;
 import com.mobilejazz.cacheio.alternative.mappers.defaults.StringKeyMapper;
 import com.mobilejazz.cacheio.alternative.wrappers.FutureCacheWrapper;
 
@@ -120,10 +123,12 @@ public class CacheIO {
     public CacheIO build() {
 
       // defaults
-
       setKeyMapper(String.class, new StringKeyMapper());
       setKeyMapper(Integer.class, new IntegerKeyMapper());
       setKeyMapper(Long.class, new LongKeyMapper());
+      setKeyMapper(Double.class, new DoubleKeyMapper());
+      setKeyMapper(Float.class, new FloatKeyMapper());
+      setKeyMapper(Short.class, new ShortKeyMapper());
 
       // assertions
       checkArgument(executor, "Executor cannot be null");
