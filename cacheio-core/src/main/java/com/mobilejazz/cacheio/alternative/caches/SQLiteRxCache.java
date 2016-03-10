@@ -249,19 +249,19 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
         final String versionSql = "SELECT " + COLUMN_KEY + ", " + COLUMN_VERSION + " FROM " +
             config.tableName + " WHERE key in (" + generatePlaceholders(keys.size()) + ")";
 
-        final Cursor versionCursor =
-            config.db.rawQuery(versionSql, keysAsString(keys));
+        final Cursor versionCursor = config.db.rawQuery(versionSql, keysAsString(keys));
 
         // determine based on version which keys we should update
 
-        while(versionCursor.moveToNext()){
+        while (versionCursor.moveToNext()) {
 
-          final K key = keyMapper.fromString(versionCursor.getString(versionCursor.getColumnIndex(COLUMN_KEY)));
+          final K key = keyMapper.fromString(
+              versionCursor.getString(versionCursor.getColumnIndex(COLUMN_KEY)));
           final long version = versionCursor.getLong(versionCursor.getColumnIndex(COLUMN_VERSION));
 
           final V value = map.get(key);
 
-          if(versionMapper.getVersion(value) > version){
+          if (versionMapper.getVersion(value) > version) {
             keysToUpdate.remove(key);
           }
         }
