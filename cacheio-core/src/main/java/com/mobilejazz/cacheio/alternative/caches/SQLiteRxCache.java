@@ -17,14 +17,13 @@
 package com.mobilejazz.cacheio.alternative.caches;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import com.mobilejazz.cacheio.alternative.RxCache;
 import com.mobilejazz.cacheio.alternative.mappers.KeyMapper;
 import com.mobilejazz.cacheio.alternative.mappers.ValueMapper;
 import com.mobilejazz.cacheio.alternative.mappers.VersionMapper;
+import com.mobilejazz.cacheio.alternative.mappers.defaults.NoOpVersionMapper;
 import rx.Single;
 import rx.SingleSubscriber;
 import rx.functions.Func1;
@@ -249,21 +248,25 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
         final String versionSql = "SELECT " + COLUMN_KEY + ", " + COLUMN_VERSION + " FROM " +
             config.tableName + " WHERE key in (" + generatePlaceholders(keys.size()) + ")";
 
-        final Cursor versionCursor = config.db.rawQuery(versionSql, keysAsString(keys));
+        final Cursor versionCursor =
+            config.db.rawQuery(versionSql, keysAsString(keys));
 
         // determine based on version which keys we should update
 
-        while (versionCursor.moveToNext()) {
+        while(versionCursor.moveToNext()){
 
-          final K key = keyMapper.fromString(
-              versionCursor.getString(versionCursor.getColumnIndex(COLUMN_KEY)));
+          final K key = keyMapper.fromString(versionCursor.getString(versionCursor.getColumnIndex(COLUMN_KEY)));
           final long version = versionCursor.getLong(versionCursor.getColumnIndex(COLUMN_VERSION));
 
           final V value = map.get(key);
 
-          if (versionMapper.getVersion(value) > version) {
+          final long valueVersion = versionMapper.getVersion(value);
+
+          if(valueVersion != NoOpVersionMapper.UNVERSIONED && versionMapper.getVersion(value) < version){
+            // attempting to overwrite a newer version so remove the key from the update list
             keysToUpdate.remove(key);
           }
+
         }
 
         versionCursor.close();
@@ -311,13 +314,13 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
         }
 
         db.setTransactionSuccessful();
+        db.endTransaction();
 
         subscriber.onSuccess(result);
 
       } catch (Throwable t) {
-        subscriber.onError(t);
-      } finally {
         db.endTransaction();
+        subscriber.onError(t);
       }
     }
 
@@ -352,13 +355,13 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
         db.execSQL(sql, keysAsString(keys));
 
         db.setTransactionSuccessful();
+        db.endTransaction();
 
         subscriber.onSuccess(keys);
 
       } catch (Throwable t) {
-        subscriber.onError(t);
-      } finally {
         db.endTransaction();
+        subscriber.onError(t);
       }
 
     }
@@ -371,8 +374,13 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
 
   public static final class Builder<K, V> {
 
-    private Context context;
-    private String databaseName;
+    public static final String CREATE_TABLE_SQL = "CREATE TABLE IF NOT EXISTS %s ( " +
+        "   key TEXT PRIMARY KEY, value BLOB NOT NULL, version REAL NOT NULL, " +
+        "   created REAL NOT NULL, expires REAL NOT NULL" +
+        ")";
+
+    private static final String DELETE_EXPIRED_SQL = "DELETE FROM %s WHERE " + COLUMN_EXPIRES + " "
+        + "< ?";
 
     private Class<K> keyType;
     private Class<V> valueType;
@@ -390,21 +398,14 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
     }
 
     private Builder(Builder<K, V> proto) {
+      this.db = proto.db;
       this.keyType = proto.keyType;
       this.valueType = proto.valueType;
-      this.context = proto.context;
-      this.databaseName = proto.databaseName;
       this.tableName = proto.tableName;
       this.keyMapper = proto.keyMapper;
       this.valueMapper = proto.valueMapper;
       this.versionMapper = proto.versionMapper;
-      this.db = proto.db;
       this.executor = proto.executor;
-    }
-
-    public Builder<K, V> setContext(Context context) {
-      this.context = context;
-      return this;
     }
 
     public Builder<K, V> setExecutor(Executor executor) {
@@ -412,8 +413,8 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
       return this;
     }
 
-    public Builder<K, V> setDatabaseName(String databaseName) {
-      this.databaseName = databaseName;
+    public Builder<K, V> setDatabase(SQLiteDatabase db) {
+      this.db = db;
       return this;
     }
 
@@ -447,16 +448,27 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
       return this;
     }
 
+    private void removeExpired() {
+      final long now = System.currentTimeMillis();
+      db.execSQL(String.format(DELETE_EXPIRED_SQL, tableName), new Object[] { now });
+    }
+
     @SuppressWarnings("unchecked") public RxCache<K, V> build() {
 
       // defaults
+
       if (this.tableName == null) {
-        this.tableName = valueType.getName().replaceAll("\\.", "_");
+        this.tableName = keyType.getName().replaceAll("\\.", "_") + "___" + valueType.getName()
+            .replaceAll("\\.", "_");
+      }
+
+      if(this.versionMapper == null){
+        this.versionMapper = new NoOpVersionMapper<>();
       }
 
       // assertions
-      checkArgument(context, "Context cannot be null");
-      checkArgument(databaseName, "Database name cannot be null");
+
+      checkArgument(db, "Database cannot be null");
       checkArgument(keyType, "Key type cannot be null");
       checkArgument(valueType, "Value type cannot be null");
       checkArgument(tableName, "Table name cannot be null");
@@ -466,51 +478,16 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
       checkArgument(versionMapper, "Version mapper cannot be null");
       checkArgument(tableName, "Table name cannot be null");
 
-      //
-      final DbHelper dbHelper = new DbHelper(context, databaseName, tableName);
-      this.db = dbHelper.getWritableDatabase();
+      // create the table if it doesn't exist
 
-      dbHelper.onCreate(db);      // ensure the table is created
-      dbHelper.removeExpired();   // remove any expired entries
+      db.execSQL(String.format(CREATE_TABLE_SQL, tableName));
+
+      // clear out all expired entries
+      removeExpired();
 
       //
       return new SQLiteRxCache<>(this);
     }
   }
 
-  private static final class DbHelper extends SQLiteOpenHelper {
-
-    static final int DATABASE_VERSION = 1;
-
-    static final String CREATE_FORMAT = "CREATE TABLE IF NOT EXISTS %s ( " +
-        "   key TEXT PRIMARY KEY, value BLOB NOT NULL, version REAL NOT NULL, " +
-        "   created REAL NOT NULL, expires REAL NOT NULL" +
-        ")";
-
-    static final String DROP_FORMAT = "DROP TABLE IF EXISTS %s";
-
-    static final String DELETE_EXPIRED_FORMAT = "DELETE FROM %s WHERE " + COLUMN_EXPIRES + " < ?";
-
-    private final String tableName;
-
-    public DbHelper(Context context, String databaseName, String tableName) {
-      super(context, databaseName, null, DATABASE_VERSION);
-      this.tableName = tableName;
-    }
-
-    @Override public void onCreate(SQLiteDatabase db) {
-      db.execSQL(String.format(CREATE_FORMAT, tableName));
-    }
-
-    @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-      db.execSQL(String.format(DROP_FORMAT, getDatabaseName()));
-      onCreate(db);
-    }
-
-    public void removeExpired() {
-      final long now = System.currentTimeMillis();
-      getWritableDatabase().execSQL(String.format(DELETE_EXPIRED_FORMAT, tableName),
-          new Object[] { now });
-    }
-  }
 }

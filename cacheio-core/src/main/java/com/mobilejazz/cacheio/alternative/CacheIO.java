@@ -20,62 +20,47 @@ import android.content.Context;
 import com.mobilejazz.cacheio.alternative.caches.SQLiteRxCache;
 import com.mobilejazz.cacheio.alternative.mappers.KeyMapper;
 import com.mobilejazz.cacheio.alternative.mappers.ValueMapper;
+import com.mobilejazz.cacheio.alternative.mappers.VersionMapper;
+import com.mobilejazz.cacheio.alternative.mappers.defaults.IntegerKeyMapper;
+import com.mobilejazz.cacheio.alternative.mappers.defaults.LongKeyMapper;
 import com.mobilejazz.cacheio.alternative.mappers.defaults.NoOpVersionMapper;
+import com.mobilejazz.cacheio.alternative.mappers.defaults.StringKeyMapper;
+import com.mobilejazz.cacheio.alternative.wrappers.FutureCacheWrapper;
+import junit.runner.Version;
 
 import java.util.*;
 import java.util.concurrent.*;
 
+import static com.mobilejazz.cacheio.internal.helper.Preconditions.checkArgument;
+
 public class CacheIO {
 
-  private Map<Class<?>, RxCache<?, ?>> rxCaches;
-  private Map<Class<?>, SyncCache<?, ?>> syncCaches;
-  private Map<Class<?>, FutureCache<?, ?>> futureCaches;
+  private Builder config;
 
-  private Context context;
-  private final String identifier;
-  private final Executor executor;
-  private final Map<Class<?>, Model<?, ?>> models;
-
-  public CacheIO(Context context, String identifier, Executor executor,
-      Map<Class<?>, Model<?, ?>> models) {
-    this.context = context;
-    this.identifier = identifier;
-    this.executor = executor;
-    this.models = models;
-
-    rxCaches = new HashMap<>();
+  private CacheIO(Builder config) {
+    this.config = config;
   }
 
-  public <K, V> RxCache<K, V> rxCache(Class<V> valueType) {
-    if (rxCaches.containsKey(valueType)) {
-      return (RxCache<K, V>) rxCaches.get(valueType);
-    } else {
-      Model<K, V> model = (Model<K, V>) models.get(valueType);
+  @SuppressWarnings("unchecked") public <K, V> RxCache<K, V> newRxCache(Class<K> keyType, Class<V> valueType){
 
-      KeyMapper<K> keyMapper = model.getKeyMapper();
-      ValueMapper valueMapper = model.getValueMapper();
-      Class<K> keyType = model.getKeyType();
+    final KeyMapper<K> keyMapper = (KeyMapper<K>) config.keyMappers.get(keyType);
+    checkArgument(keyMapper, "A key mapper was not found for type = " + keyMapper.getClass() + "."
+        + " You must register a key mapper for this type when building CacheIO");
 
-      RxCache<K, V> rxCache = SQLiteRxCache.newBuilder(keyType, valueType)
-          .setContext(context)
-          .setDatabaseName(identifier)
-          .setExecutor(executor)
-          .setKeyMapper(keyMapper)
-          .setValueMapper(valueMapper)
-          .setVersionMapper(new NoOpVersionMapper<V>())
-          .build();
+    return SQLiteRxCache.newBuilder(keyType, valueType)
+        .setExecutor(config.executor)
+        .setKeyMapper(keyMapper)
+        .setVersionMapper((VersionMapper<V>) config.versionMappers.get(valueType))
+        .setValueMapper(config.valueMapper)
+        .setDatabase(null)
+        .build();
 
-      rxCaches.put(valueType, rxCache);
-      return rxCache;
-    }
   }
 
-  public <K, V> SyncCache<K, V> syncCache() {
-    return null;
-  }
-
-  public <K, V> FutureCache<K, V> futureCache() {
-    return null;
+  public <K, V> FutureCache<K, V> newFutureCache(Class<K> keyType, Class<V> valueType){
+    return FutureCacheWrapper.newBuilder(keyType, valueType)
+        .setDelegate(newRxCache(keyType, valueType))
+        .build();
   }
 
   public static Builder with(Context context) {
@@ -85,26 +70,45 @@ public class CacheIO {
   public static class Builder {
 
     private final Context context;
+
+    private Map<Class<?>, KeyMapper<?>> keyMappers = new HashMap<>();
+    private Map<Class<?>, VersionMapper<?>> versionMappers = new HashMap<>();
+
+    private ValueMapper valueMapper;
+
     private String identifier;
     private Executor executor;
 
-    private Map<Class<?>, Model<?, ?>> models;
-
     public Builder(Context context) {
-      models = new HashMap<>();
-
       this.context = context;
+    }
+
+    private Builder(Builder proto){
+      this.context = proto.context;
+      this.keyMappers = new HashMap<>(proto.keyMappers);
+      this.valueMapper = proto.valueMapper;
+      this.versionMappers = new HashMap<>(proto.versionMappers);
+      this.identifier = proto.identifier;
+      this.executor = proto.executor;
+    }
+
+    public <T> Builder setKeyMapper(Class<T> type, KeyMapper<T> keyMapper){
+      keyMappers.put(type, keyMapper);
+      return this;
+    }
+
+    public <T> Builder setVersionMapper(Class<T> type, VersionMapper<T> versionMapper){
+      versionMappers.put(type, versionMapper);
+      return this;
+    }
+
+    public Builder setValueMapper(ValueMapper valueMapper) {
+      this.valueMapper = valueMapper;
+      return this;
     }
 
     public Builder identifier(String identifier) {
       this.identifier = identifier;
-      return this;
-    }
-
-    public <K, V> Builder mapper(Class<K> keyType, Class<V> valueType, KeyMapper<K> keyMapper,
-        ValueMapper valueMapper) {
-      Model<K, V> kModel = new Model<>(keyType, valueType, keyMapper, valueMapper);
-      models.put(valueType, kModel);
       return this;
     }
 
@@ -114,39 +118,19 @@ public class CacheIO {
     }
 
     public CacheIO build() {
-      return new CacheIO(context, identifier, executor, models);
+
+      // defaults
+
+      setKeyMapper(String.class, new StringKeyMapper());
+      setKeyMapper(Integer.class, new IntegerKeyMapper());
+      setKeyMapper(Long.class, new LongKeyMapper());
+
+      // assertions
+
+      // create database
+
+      return new CacheIO(new Builder(this));
     }
   }
 
-  public static class Model<K, V> {
-
-    private final Class<K> keyType;
-    private final Class<V> valueType;
-    private KeyMapper<K> keyMapper;
-    private ValueMapper valueMapper;
-
-    public Model(Class<K> keyType, Class<V> valueType, KeyMapper<K> keyMapper,
-        ValueMapper valueMapper) {
-      this.keyType = keyType;
-      this.valueType = valueType;
-      this.keyMapper = keyMapper;
-      this.valueMapper = valueMapper;
-    }
-
-    public Class<K> getKeyType() {
-      return keyType;
-    }
-
-    public Class<V> getValueType() {
-      return valueType;
-    }
-
-    public KeyMapper<K> getKeyMapper() {
-      return keyMapper;
-    }
-
-    public ValueMapper getValueMapper() {
-      return valueMapper;
-    }
-  }
 }

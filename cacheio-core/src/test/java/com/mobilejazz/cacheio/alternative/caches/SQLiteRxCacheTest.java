@@ -16,7 +16,7 @@
 
 package com.mobilejazz.cacheio.alternative.caches;
 
-import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import com.mobilejazz.cacheio.ApplicationTestCase;
 import com.mobilejazz.cacheio.alternative.RxCache;
 import com.mobilejazz.cacheio.alternative.mappers.KeyMapper;
@@ -26,9 +26,14 @@ import com.mobilejazz.cacheio.alternative.mappers.defaults.NoOpVersionMapper;
 import com.mobilejazz.cacheio.alternative.mappers.defaults.StringKeyMapper;
 import com.mobilejazz.cacheio.alternative.wrappers.FutureCacheWrapper;
 import com.mobilejazz.cacheio.alternative.wrappers.SyncCacheWrapper;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.robolectric.RuntimeEnvironment;
 
+import java.util.*;
 import java.util.concurrent.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,75 +41,61 @@ import static org.mockito.Mockito.mock;
 
 public class SQLiteRxCacheTest extends ApplicationTestCase {
 
-  @Test(expected = IllegalArgumentException.class) @SuppressWarnings("unchecked")
-  public void shouldThrowIllegalArgumentExceptionIfContextIsNull() {
-    SQLiteRxCache.newBuilder(String.class, String.class)
-        .setDatabaseName("foo")
-        .setKeyMapper(mock(KeyMapper.class))
-        .setValueMapper(mock(ValueMapper.class))
-        .setVersionMapper(mock(VersionMapper.class))
-        .setExecutor(mock(Executor.class))
-        .setTableName("table")
-        .build();
+  private static final String DATABASE_NAME = "testDatabase";
+  private static final String TABLE_NAME = "testCache";
+
+  private SQLiteDatabase db;
+
+  @Before
+  public void before(){
+    final SQLiteRxCacheOpenHelper openHelper =
+        new SQLiteRxCacheOpenHelper(RuntimeEnvironment.application, DATABASE_NAME);
+
+    db = openHelper.getWritableDatabase();
+  }
+
+  @After
+  public void after(){
+    db.close();
   }
 
   @Test(expected = IllegalArgumentException.class) @SuppressWarnings("unchecked")
-  public void shouldThrowIllegalArgumentExceptionIfDatabaseNameIsNull() {
+  public void shouldThrowIllegalArgumentExceptionIfDatabaseIsNull() {
     SQLiteRxCache.newBuilder(String.class, String.class)
-        .setContext(mock(Context.class))
         .setKeyMapper(mock(KeyMapper.class))
         .setValueMapper(mock(ValueMapper.class))
         .setVersionMapper(mock(VersionMapper.class))
         .setExecutor(mock(Executor.class))
-        .setTableName("table")
         .build();
   }
 
   @Test(expected = IllegalArgumentException.class) @SuppressWarnings("unchecked")
   public void shouldThrowIllegalArgumentExceptionIfKeyMapperIsNull() {
     SQLiteRxCache.newBuilder(String.class, String.class)
-        .setContext(mock(Context.class))
-        .setDatabaseName("db")
+        .setDatabase(db)
         .setValueMapper(mock(ValueMapper.class))
         .setVersionMapper(mock(VersionMapper.class))
         .setExecutor(mock(Executor.class))
-        .setTableName("table")
         .build();
   }
 
   @Test(expected = IllegalArgumentException.class) @SuppressWarnings("unchecked")
   public void shouldThrowIllegalArgumentExceptionIfValueMapperIsNull() {
     SQLiteRxCache.newBuilder(String.class, String.class)
-        .setContext(mock(Context.class))
-        .setDatabaseName("db")
+        .setDatabase(db)
         .setKeyMapper(mock(KeyMapper.class))
         .setVersionMapper(mock(VersionMapper.class))
         .setExecutor(mock(Executor.class))
-        .setTableName("table")
-        .build();
-  }
-
-  @Test(expected = IllegalArgumentException.class) @SuppressWarnings("unchecked")
-  public void shouldThrowIllegalArgumentExceptionIfVersionMapperIsNull() {
-    SQLiteRxCache.newBuilder(String.class, String.class)
-        .setContext(mock(Context.class))
-        .setDatabaseName("db")
-        .setKeyMapper(mock(KeyMapper.class))
-        .setValueMapper(mock(ValueMapper.class))
-        .setExecutor(mock(Executor.class))
-        .setTableName("table")
         .build();
   }
 
   @Test(expected = IllegalArgumentException.class) @SuppressWarnings("unchecked")
   public void shouldThrowIllegalArgumentExceptionIfExecutorIsNull() {
     SQLiteRxCache.newBuilder(String.class, String.class)
-        .setContext(mock(Context.class))
-        .setDatabaseName("db")
+        .setDatabase(db)
         .setKeyMapper(mock(KeyMapper.class))
         .setValueMapper(mock(ValueMapper.class))
         .setVersionMapper(mock(VersionMapper.class))
-        .setTableName("table")
         .build();
   }
 
@@ -114,13 +105,10 @@ public class SQLiteRxCacheTest extends ApplicationTestCase {
     final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     final RxCache<String, TestUser> rxCache = SQLiteRxCache.newBuilder(String.class, TestUser.class)
-        .setContext(RuntimeEnvironment.application)
-        .setDatabaseName("rxcache_test")
+        .setDatabase(db)
         .setKeyMapper(new StringKeyMapper())
         .setValueMapper(valueMapper)
-        .setVersionMapper(new NoOpVersionMapper<TestUser>())
         .setExecutor(executor)
-        .setTableName("TestUser")
         .build();
 
     final FutureCacheWrapper<String, TestUser> futureCache =
@@ -168,13 +156,10 @@ public class SQLiteRxCacheTest extends ApplicationTestCase {
     final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     final RxCache<String, TestUser> rxCache = SQLiteRxCache.newBuilder(String.class, TestUser.class)
-        .setContext(RuntimeEnvironment.application)
-        .setDatabaseName("rxcache_test")
+        .setDatabase(db)
         .setKeyMapper(new StringKeyMapper())
         .setValueMapper(valueMapper)
-        .setVersionMapper(new NoOpVersionMapper<TestUser>())
         .setExecutor(executor)
-        .setTableName("TestUser")
         .build();
 
     final FutureCacheWrapper<String, TestUser> futureCache =
