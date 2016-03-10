@@ -23,15 +23,14 @@ import com.mobilejazz.cacheio.alternative.mappers.ValueMapper;
 import com.mobilejazz.cacheio.alternative.mappers.VersionMapper;
 import com.mobilejazz.cacheio.alternative.mappers.defaults.IntegerKeyMapper;
 import com.mobilejazz.cacheio.alternative.mappers.defaults.LongKeyMapper;
-import com.mobilejazz.cacheio.alternative.mappers.defaults.NoOpVersionMapper;
 import com.mobilejazz.cacheio.alternative.mappers.defaults.StringKeyMapper;
 import com.mobilejazz.cacheio.alternative.wrappers.FutureCacheWrapper;
-import junit.runner.Version;
 
 import java.util.*;
 import java.util.concurrent.*;
 
 import static com.mobilejazz.cacheio.internal.helper.Preconditions.checkArgument;
+import static com.mobilejazz.cacheio.internal.helper.Preconditions.checkIsEmpty;
 
 public class CacheIO {
 
@@ -41,7 +40,8 @@ public class CacheIO {
     this.config = config;
   }
 
-  @SuppressWarnings("unchecked") public <K, V> RxCache<K, V> newRxCache(Class<K> keyType, Class<V> valueType){
+  @SuppressWarnings("unchecked")
+  public <K, V> RxCache<K, V> newRxCache(Class<K> keyType, Class<V> valueType) {
 
     final KeyMapper<K> keyMapper = (KeyMapper<K>) config.keyMappers.get(keyType);
     checkArgument(keyMapper, "A key mapper was not found for type = " + keyMapper.getClass() + "."
@@ -57,7 +57,7 @@ public class CacheIO {
 
   }
 
-  public <K, V> FutureCache<K, V> newFutureCache(Class<K> keyType, Class<V> valueType){
+  public <K, V> FutureCache<K, V> newFutureCache(Class<K> keyType, Class<V> valueType) {
     return FutureCacheWrapper.newBuilder(keyType, valueType)
         .setDelegate(newRxCache(keyType, valueType))
         .build();
@@ -83,7 +83,7 @@ public class CacheIO {
       this.context = context;
     }
 
-    private Builder(Builder proto){
+    private Builder(Builder proto) {
       this.context = proto.context;
       this.keyMappers = new HashMap<>(proto.keyMappers);
       this.valueMapper = proto.valueMapper;
@@ -92,12 +92,12 @@ public class CacheIO {
       this.executor = proto.executor;
     }
 
-    public <T> Builder setKeyMapper(Class<T> type, KeyMapper<T> keyMapper){
+    public <T> Builder setKeyMapper(Class<T> type, KeyMapper<T> keyMapper) {
       keyMappers.put(type, keyMapper);
       return this;
     }
 
-    public <T> Builder setVersionMapper(Class<T> type, VersionMapper<T> versionMapper){
+    public <T> Builder setVersionMapper(Class<T> type, VersionMapper<T> versionMapper) {
       versionMappers.put(type, versionMapper);
       return this;
     }
@@ -126,6 +126,9 @@ public class CacheIO {
       setKeyMapper(Long.class, new LongKeyMapper());
 
       // assertions
+      checkArgument(executor, "Executor cannot be null");
+      checkIsEmpty(identifier, "Identifier cannot be null or empty");
+      checkArgument(context, "Context cannot be null");
 
       // create database
 
