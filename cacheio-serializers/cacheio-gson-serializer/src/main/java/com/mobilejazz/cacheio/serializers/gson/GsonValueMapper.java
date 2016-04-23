@@ -1,7 +1,7 @@
 package com.mobilejazz.cacheio.serializers.gson;
 
 import com.google.gson.Gson;
-import com.mobilejazz.cacheio.alternative.mappers.ValueMapper;
+import com.mobilejazz.cacheio.mappers.ValueMapper;
 import com.mobilejazz.cacheio.exceptions.SerializerException;
 
 import java.io.IOException;

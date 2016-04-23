@@ -18,8 +18,6 @@ package com.mobilejazz.cacheio;
 
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
-import com.mobilejazz.cacheio.alternative.CacheIO;
-import com.mobilejazz.cacheio.alternative.SyncCache;
 import com.mobilejazz.cacheio.model.DummyUser;
 import org.junit.Before;
 import org.junit.Test;
