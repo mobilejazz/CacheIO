@@ -22,7 +22,7 @@ import com.mobilejazz.cacheio.alternative.RxCache;
 import com.mobilejazz.cacheio.alternative.mappers.KeyMapper;
 import com.mobilejazz.cacheio.alternative.mappers.ValueMapper;
 import com.mobilejazz.cacheio.alternative.mappers.VersionMapper;
-import com.mobilejazz.cacheio.alternative.mappers.value.StringKeyMapper;
+import com.mobilejazz.cacheio.alternative.mappers.key.StringKeyMapper;
 import com.mobilejazz.cacheio.alternative.wrappers.FutureCacheWrapper;
 import com.mobilejazz.cacheio.alternative.wrappers.SyncCacheWrapper;
 import org.junit.After;

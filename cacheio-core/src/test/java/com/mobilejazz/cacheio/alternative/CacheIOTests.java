@@ -17,7 +17,11 @@
 package com.mobilejazz.cacheio.alternative;
 
 import com.mobilejazz.cacheio.ApplicationTestCase;
+import com.mobilejazz.cacheio.model.UserTestModel;
 import org.junit.Test;
+import org.robolectric.RuntimeEnvironment;
+
+import java.util.concurrent.*;
 
 public class CacheIOTests extends ApplicationTestCase {
 
@@ -42,5 +46,13 @@ public class CacheIOTests extends ApplicationTestCase {
     //Thread.sleep(1000);
     //
     //Assertions.assertThat(jose).isNotNull();
+
+    CacheIO cacheIO = CacheIO.with(RuntimeEnvironment.application)
+        .identifier("test")
+        .executor(Executors.newSingleThreadExecutor())
+        .build();
+
+    SyncCache<String, UserTestModel> syncCache =
+        cacheIO.newSyncCache(String.class, UserTestModel.class);
   }
 }

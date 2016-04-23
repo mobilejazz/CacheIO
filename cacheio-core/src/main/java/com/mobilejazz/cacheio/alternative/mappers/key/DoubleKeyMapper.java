@@ -14,21 +14,21 @@
  *  limitations under the License.
  */
 
-package com.mobilejazz.cacheio.alternative.mappers.value;
+package com.mobilejazz.cacheio.alternative.mappers.key;
 
 import com.mobilejazz.cacheio.alternative.mappers.KeyMapper;
 
 import static com.mobilejazz.cacheio.internal.helper.Preconditions.checkArgument;
 
-public class ShortKeyMapper implements KeyMapper<Short> {
+public class DoubleKeyMapper implements KeyMapper<Double> {
 
-  @Override public String toString(Short model) {
+  @Override public String toString(Double model) {
     checkArgument(model, "key cannot be null");
     return model.toString();
   }
 
-  @Override public Short fromString(String str) {
+  @Override public Double fromString(String str) {
     checkArgument(str, "str cannot be null");
-    return Short.valueOf(str);
+    return Double.parseDouble(str);
   }
 }

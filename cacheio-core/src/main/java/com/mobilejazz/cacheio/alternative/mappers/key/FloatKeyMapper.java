@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Mobile Jazz
+ * Copyright (C) 2016 Mobile Jazz
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -14,19 +14,21 @@
  *  limitations under the License.
  */
 
-package com.mobilejazz.cacheio.detector.storeobject;
+package com.mobilejazz.cacheio.alternative.mappers.key;
 
-import java.util.List;
+import com.mobilejazz.cacheio.alternative.mappers.KeyMapper;
 
-public class TypeDetectorFactory {
+import static com.mobilejazz.cacheio.internal.helper.Preconditions.checkArgument;
 
-  public static <T> TypeValueStrategy obtain(T value) {
-    if (value instanceof List) {
-      return new ListTypeValueStrategy();
-    } else if (value instanceof Object) {
-      return new ObjectTypeValueStrategy();
-    } else {
-      return new TypeValueStrategy.NullTypeValueStrategy();
-    }
+public class FloatKeyMapper implements KeyMapper<Float> {
+
+  @Override public String toString(Float model) {
+    checkArgument(model, "key cannot be null");
+    return model.toString();
+  }
+
+  @Override public Float fromString(String str) {
+    checkArgument(str, "str cannot be null");
+    return Float.parseFloat(str);
   }
 }

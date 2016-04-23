@@ -14,29 +14,21 @@
  *  limitations under the License.
  */
 
-package com.mobilejazz.cacheio.model;
+package com.mobilejazz.cacheio.alternative.mappers.key;
 
-public class UserTestModel {
+import com.mobilejazz.cacheio.alternative.mappers.KeyMapper;
 
-  private int id;
-  private String name;
+import static com.mobilejazz.cacheio.internal.helper.Preconditions.checkArgument;
 
-  public UserTestModel() {
+public class ShortKeyMapper implements KeyMapper<Short> {
+
+  @Override public String toString(Short model) {
+    checkArgument(model, "key cannot be null");
+    return model.toString();
   }
 
-  public int getId() {
-    return id;
-  }
-
-  public void setId(int id) {
-    this.id = id;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
+  @Override public Short fromString(String str) {
+    checkArgument(str, "str cannot be null");
+    return Short.valueOf(str);
   }
 }

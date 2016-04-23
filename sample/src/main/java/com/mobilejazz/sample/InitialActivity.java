@@ -3,15 +3,13 @@ package com.mobilejazz.sample;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import com.mobilejazz.cacheio.Cache;
-import com.mobilejazz.cacheio.CacheIO;
-import com.mobilejazz.cacheio.logging.LogLevel;
-import com.mobilejazz.cacheio.manager.entity.CacheEntry;
-import com.mobilejazz.cacheio.serializers.gson.GsonSerializer;
+import com.mobilejazz.cacheio.alternative.CacheIO;
+import com.mobilejazz.cacheio.alternative.SyncCache;
+import com.mobilejazz.cacheio.serializers.gson.GsonValueMapper;
 import com.mobilejazz.sample.gson.GsonFactory;
 import com.mobilejazz.sample.model.User;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.util.concurrent.*;
 
 public class InitialActivity extends AppCompatActivity {
 
@@ -23,6 +21,29 @@ public class InitialActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_initial);
 
+    CacheIO cacheIO = CacheIO.with(getApplicationContext())
+        .identifier("cacheio_test")
+        .executor(Executors.newSingleThreadExecutor())
+        .setValueMapper(new GsonValueMapper(GsonFactory.create()))
+        .build();
+
+    SyncCache<String, User> syncCache = cacheIO.newSyncCache(String.class, User.class);
+
+    User userOne = new User();
+    userOne.setId(1);
+    userOne.setName("Jose Luis Franconetti");
+
+    syncCache.put("test.dumy", userOne, Long.MAX_VALUE, TimeUnit.SECONDS);
+
+    User user = syncCache.get("test.dumy");
+
+    Log.d(TAG, user.toString());
+
+
+
+
+
+    /*
     CacheIO cacheIO = CacheIO.with(getApplicationContext())
         .identifier("cacheio-test")
         .logLevel(LogLevel.FULL)
@@ -65,6 +86,7 @@ public class InitialActivity extends AppCompatActivity {
     for (User user : resultQueryListUsers) {
       Log.d(TAG, "List - " + user.toString());
     }
+    */
 
 /*    User userThree = new User();
     userThree.setId(3);

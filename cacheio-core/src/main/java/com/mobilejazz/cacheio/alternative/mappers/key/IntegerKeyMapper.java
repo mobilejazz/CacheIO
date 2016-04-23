@@ -1,4 +1,4 @@
-package com.mobilejazz.cacheio.alternative.mappers.value;
+package com.mobilejazz.cacheio.alternative.mappers.key;
 
 import com.mobilejazz.cacheio.alternative.mappers.KeyMapper;
 

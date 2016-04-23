@@ -18,16 +18,19 @@ package com.mobilejazz.cacheio.alternative;
 
 import android.content.Context;
 import com.mobilejazz.cacheio.alternative.caches.SQLiteRxCache;
+import com.mobilejazz.cacheio.alternative.caches.SQLiteRxCacheOpenHelper;
 import com.mobilejazz.cacheio.alternative.mappers.KeyMapper;
 import com.mobilejazz.cacheio.alternative.mappers.ValueMapper;
 import com.mobilejazz.cacheio.alternative.mappers.VersionMapper;
-import com.mobilejazz.cacheio.alternative.mappers.value.DoubleKeyMapper;
-import com.mobilejazz.cacheio.alternative.mappers.value.FloatKeyMapper;
-import com.mobilejazz.cacheio.alternative.mappers.value.IntegerKeyMapper;
-import com.mobilejazz.cacheio.alternative.mappers.value.LongKeyMapper;
-import com.mobilejazz.cacheio.alternative.mappers.value.ShortKeyMapper;
-import com.mobilejazz.cacheio.alternative.mappers.value.StringKeyMapper;
+import com.mobilejazz.cacheio.alternative.mappers.key.DoubleKeyMapper;
+import com.mobilejazz.cacheio.alternative.mappers.key.FloatKeyMapper;
+import com.mobilejazz.cacheio.alternative.mappers.key.IntegerKeyMapper;
+import com.mobilejazz.cacheio.alternative.mappers.key.LongKeyMapper;
+import com.mobilejazz.cacheio.alternative.mappers.key.ShortKeyMapper;
+import com.mobilejazz.cacheio.alternative.mappers.key.StringKeyMapper;
+import com.mobilejazz.cacheio.alternative.mappers.value.DefaultValueMapper;
 import com.mobilejazz.cacheio.alternative.wrappers.FutureCacheWrapper;
+import com.mobilejazz.cacheio.alternative.wrappers.SyncCacheWrapper;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -45,9 +48,10 @@ public class CacheIO {
 
   @SuppressWarnings("unchecked")
   public <K, V> RxCache<K, V> newRxCache(Class<K> keyType, Class<V> valueType) {
-
     final KeyMapper<K> keyMapper = (KeyMapper<K>) config.keyMappers.get(keyType);
-    checkArgument(keyMapper, "A key mapper was not found for type = " + keyMapper.getClass() + "."
+    checkArgument(keyMapper, "A key mapper was not found for type = "
+        + keyMapper.getClass()
+        + "."
         + " You must register a key mapper for this type when building CacheIO");
 
     return SQLiteRxCache.newBuilder(keyType, valueType)
@@ -55,7 +59,7 @@ public class CacheIO {
         .setKeyMapper(keyMapper)
         .setVersionMapper((VersionMapper<V>) config.versionMappers.get(valueType))
         .setValueMapper(config.valueMapper)
-        .setDatabase(null)
+        .setDatabase(config.db.getWritableDatabase())
         .build();
 
   }
@@ -66,11 +70,19 @@ public class CacheIO {
         .build();
   }
 
+  public <K, V> SyncCache<K, V> newSyncCache(Class<K> keyType, Class<V> valueType) {
+    return SyncCacheWrapper.newBuilder(keyType, valueType)
+        .setDelegate(newFutureCache(keyType, valueType))
+        .build();
+  }
+
   public static Builder with(Context context) {
     return new Builder(context);
   }
 
   public static class Builder {
+
+    private SQLiteRxCacheOpenHelper db;
 
     private final Context context;
 
@@ -93,6 +105,7 @@ public class CacheIO {
       this.versionMappers = new HashMap<>(proto.versionMappers);
       this.identifier = proto.identifier;
       this.executor = proto.executor;
+      this.db = proto.db;
     }
 
     public <T> Builder setKeyMapper(Class<T> type, KeyMapper<T> keyMapper) {
@@ -130,12 +143,18 @@ public class CacheIO {
       setKeyMapper(Float.class, new FloatKeyMapper());
       setKeyMapper(Short.class, new ShortKeyMapper());
 
+      // Value mappers
+      if (valueMapper == null) {
+        valueMapper = new DefaultValueMapper();
+      }
+
       // assertions
       checkArgument(executor, "Executor cannot be null");
       checkIsEmpty(identifier, "Identifier cannot be null or empty");
       checkArgument(context, "Context cannot be null");
 
       // create database
+      db = new SQLiteRxCacheOpenHelper(context, identifier);
 
       return new CacheIO(new Builder(this));
     }

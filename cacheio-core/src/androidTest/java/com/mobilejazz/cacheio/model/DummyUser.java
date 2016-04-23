@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Mobile Jazz
+ * Copyright (C) 2016 Mobile Jazz
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -14,19 +14,27 @@
  *  limitations under the License.
  */
 
-package com.mobilejazz.cacheio.strategy.timestamp;
+package com.mobilejazz.cacheio.model;
 
-import com.mobilejazz.cacheio.strategy.CachingStrategy;
+public class DummyUser {
 
-public class TimestampCachingStrategy<T extends TimestampCachingObject>
-    implements CachingStrategy<T> {
+  private int id;
+  private String name;
 
-  @Override public boolean isValid(T data) {
-    return data != null && validate(data);
+  private DummyUser(int id, String name) {
+    this.id = id;
+    this.name = name;
   }
 
-  private boolean validate(T data) {
-    long difference = System.currentTimeMillis() - data.getTimestamp();
-    return difference < data.getExpiredMillis();
+  public int getId() {
+    return id;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public static DummyUser create(int id, String name) {
+    return new DummyUser(id, name);
   }
 }
