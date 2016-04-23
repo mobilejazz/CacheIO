@@ -14,16 +14,21 @@
  *  limitations under the License.
  */
 
-package com.mobilejazz.cacheio;
+package com.mobilejazz.cacheio.mappers.key;
 
-import org.junit.Ignore;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
+import com.mobilejazz.cacheio.mappers.KeyMapper;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
-@Ignore
-public class ApplicationTestCase {
+import static com.mobilejazz.cacheio.helper.Preconditions.checkArgument;
 
+public class DoubleKeyMapper implements KeyMapper<Double> {
+
+  @Override public String toString(Double model) {
+    checkArgument(model, "key cannot be null");
+    return model.toString();
+  }
+
+  @Override public Double fromString(String str) {
+    checkArgument(str, "str cannot be null");
+    return Double.parseDouble(str);
+  }
 }

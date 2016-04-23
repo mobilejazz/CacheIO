@@ -14,16 +14,27 @@
  *  limitations under the License.
  */
 
-package com.mobilejazz.cacheio;
+package com.mobilejazz.cacheio.model;
 
-import org.junit.Ignore;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
+public class DummyUser {
 
-@RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
-@Ignore
-public class ApplicationTestCase {
+  private int id;
+  private String name;
 
+  private DummyUser(int id, String name) {
+    this.id = id;
+    this.name = name;
+  }
+
+  public int getId() {
+    return id;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public static DummyUser create(int id, String name) {
+    return new DummyUser(id, name);
+  }
 }

@@ -11,62 +11,69 @@ group = 'com.github.mobilejazz'
 def v = rootProject.ext
 
 android {
-  compileSdkVersion v.compileSdkVersion
-  buildToolsVersion v.buildToolsVersion
+    compileSdkVersion v.compileSdkVersion
+    buildToolsVersion v.buildToolsVersion
 
-  defaultConfig {
-    minSdkVersion v.minSdkVersion
-    targetSdkVersion v.targetSdkVersion
-    versionCode advancedVersioning.versionCode
-    versionName advancedVersioning.versionName
-  }
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_7
-    targetCompatibility JavaVersion.VERSION_1_7
-  }
-  buildTypes {
-    debug {
-      testCoverageEnabled = true
-    }
-    release {
-      minifyEnabled false
-      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-    }
-  }
+    defaultConfig {
+        minSdkVersion v.minSdkVersion
+        targetSdkVersion v.targetSdkVersion
+        versionCode advancedVersioning.versionCode
+        versionName advancedVersioning.versionName
+        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
 
-  testOptions {
-    unitTests.returnDefaultValues = true
-  }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+    buildTypes {
+        debug {
+            testCoverageEnabled = true
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
 }
 
 advancedVersioning {
-  outputOptions {
-    renameOutput false
-  }
-  codeOptions {
-    versionCodeType VersionCodeType.DATE
-  }
-  nameOptions {
-    versionMajor 0
-    versionMinor 3
-    versionPatch 0
-    //versionBuild 0
-  }
+    outputOptions {
+        renameOutput false
+    }
+    codeOptions {
+        versionCodeType VersionCodeType.DATE
+    }
+    nameOptions {
+        versionMajor 0
+        versionMinor 3
+        versionPatch 0
+        //versionBuild 0
+    }
 }
 
 dependencies {
-  compile "com.android.support:appcompat-v7:${v.supportLibrariesVersion}"
-  compile "com.android.support:support-annotations:${v.supportLibrariesVersion}"
+    compile "com.android.support:appcompat-v7:${v.supportLibrariesVersion}"
+    compile "com.android.support:support-annotations:${v.supportLibrariesVersion}"
 
-  compile 'com.squareup.sqlbrite:sqlbrite:0.3.1'
+    compile 'com.squareup.sqlbrite:sqlbrite:0.3.1'
 
-  testCompile "junit:junit:${v.junitVersion}"
-  testCompile "org.assertj:assertj-core:${v.assertJVersion}"
-  testCompile "org.mockito:mockito-core:${v.mockitoVersion}"
-  testCompile "org.robolectric:robolectric:${v.robolectricVersion}"
+    testCompile "junit:junit:${v.junitVersion}"
+    testCompile "org.assertj:assertj-core:${v.assertJVersion}"
+    testCompile "org.mockito:mockito-core:${v.mockitoVersion}"
+    testCompile "org.robolectric:robolectric:${v.robolectricVersion}"
 
-  testCompile "org.powermock:powermock-api-mockito:${v.powerMockitoVersion}"
-  testCompile "org.powermock:powermock-module-junit4-rule-agent:${v.powerMockitoVersion}"
-  testCompile "org.powermock:powermock-module-junit4-rule:${v.powerMockitoVersion}"
-  testCompile "org.powermock:powermock-module-junit4:${v.powerMockitoVersion}"
+    testCompile "org.powermock:powermock-api-mockito:${v.powerMockitoVersion}"
+    testCompile "org.powermock:powermock-module-junit4-rule-agent:${v.powerMockitoVersion}"
+    testCompile "org.powermock:powermock-module-junit4-rule:${v.powerMockitoVersion}"
+    testCompile "org.powermock:powermock-module-junit4:${v.powerMockitoVersion}"
+
+    androidTestCompile 'com.android.support.test:runner:0.4'
+    androidTestCompile "org.assertj:assertj-core:${v.assertJVersion}"
+
+    compile 'com.google.code.gson:gson:2.4'
 }

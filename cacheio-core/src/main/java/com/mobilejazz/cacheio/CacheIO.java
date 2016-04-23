@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Mobile Jazz
+ * Copyright (C) 2016 Mobile Jazz
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -17,48 +17,109 @@
 package com.mobilejazz.cacheio;
 
 import android.content.Context;
-import android.text.TextUtils;
+import com.mobilejazz.cacheio.caches.SQLiteRxCache;
+import com.mobilejazz.cacheio.caches.SQLiteRxCacheOpenHelper;
+import com.mobilejazz.cacheio.mappers.KeyMapper;
+import com.mobilejazz.cacheio.mappers.ValueMapper;
+import com.mobilejazz.cacheio.mappers.VersionMapper;
+import com.mobilejazz.cacheio.mappers.key.DoubleKeyMapper;
+import com.mobilejazz.cacheio.mappers.key.FloatKeyMapper;
+import com.mobilejazz.cacheio.mappers.key.IntegerKeyMapper;
+import com.mobilejazz.cacheio.mappers.key.LongKeyMapper;
+import com.mobilejazz.cacheio.mappers.key.ShortKeyMapper;
+import com.mobilejazz.cacheio.mappers.key.StringKeyMapper;
+import com.mobilejazz.cacheio.mappers.value.DefaultValueMapper;
+import com.mobilejazz.cacheio.wrappers.FutureCacheWrapper;
+import com.mobilejazz.cacheio.wrappers.SyncCacheWrapper;
 
-import com.mobilejazz.cacheio.internal.helper.Preconditions;
-import com.mobilejazz.cacheio.logging.AndroidLogger;
-import com.mobilejazz.cacheio.logging.LogLevel;
-import com.mobilejazz.cacheio.logging.Logger;
-import com.mobilejazz.cacheio.persistence.Persistence;
-import com.mobilejazz.cacheio.persistence.sqlbrite.PersistenceSQLBrite;
-import com.mobilejazz.cacheio.serializer.Serializer;
+import java.util.*;
+import java.util.concurrent.*;
+
+import static com.mobilejazz.cacheio.helper.Preconditions.checkArgument;
+import static com.mobilejazz.cacheio.helper.Preconditions.checkIsEmpty;
 
 public class CacheIO {
 
-  private final Cache cache;
+  private Builder config;
 
-  private CacheIO(Persistence persistence, Serializer serializer, Logger logger,
-      LogLevel logLevel) {
-    this.cache = new CacheManager(persistence, serializer, logger, logLevel);
+  private CacheIO(Builder config) {
+    this.config = config;
   }
 
-  public Cache cacheDataSource() {
-    return cache;
+  @SuppressWarnings("unchecked")
+  public <K, V> RxCache<K, V> newRxCache(Class<K> keyType, Class<V> valueType) {
+    final KeyMapper<K> keyMapper = (KeyMapper<K>) config.keyMappers.get(keyType);
+    checkArgument(keyMapper, "A key mapper was not found for type = "
+        + keyMapper.getClass()
+        + "."
+        + " You must register a key mapper for this type when building CacheIO");
+
+    return SQLiteRxCache.newBuilder(keyType, valueType)
+        .setExecutor(config.executor)
+        .setKeyMapper(keyMapper)
+        .setVersionMapper((VersionMapper<V>) config.versionMappers.get(valueType))
+        .setValueMapper(config.valueMapper)
+        .setDatabase(config.db.getWritableDatabase())
+        .build();
+
+  }
+
+  public <K, V> FutureCache<K, V> newFutureCache(Class<K> keyType, Class<V> valueType) {
+    return FutureCacheWrapper.newBuilder(keyType, valueType)
+        .setDelegate(newRxCache(keyType, valueType))
+        .build();
+  }
+
+  public <K, V> SyncCache<K, V> newSyncCache(Class<K> keyType, Class<V> valueType) {
+    return SyncCacheWrapper.newBuilder(keyType, valueType)
+        .setDelegate(newFutureCache(keyType, valueType))
+        .build();
   }
 
   public static Builder with(Context context) {
     return new Builder(context);
   }
 
-  public static final class Builder {
+  public static class Builder {
 
-    private Persistence persistence;
-    private Serializer serializer;
-    private Logger logger;
-    private LogLevel logLevel;
+    private SQLiteRxCacheOpenHelper db;
+
+    private final Context context;
+
+    private Map<Class<?>, KeyMapper<?>> keyMappers = new HashMap<>();
+    private Map<Class<?>, VersionMapper<?>> versionMappers = new HashMap<>();
+
+    private ValueMapper valueMapper;
+
     private String identifier;
-    private Context context;
+    private Executor executor;
 
     public Builder(Context context) {
       this.context = context;
     }
 
-    public Builder serializer(Serializer serializer) {
-      this.serializer = serializer;
+    private Builder(Builder proto) {
+      this.context = proto.context;
+      this.keyMappers = new HashMap<>(proto.keyMappers);
+      this.valueMapper = proto.valueMapper;
+      this.versionMappers = new HashMap<>(proto.versionMappers);
+      this.identifier = proto.identifier;
+      this.executor = proto.executor;
+      this.db = proto.db;
+    }
+
+    public <T> Builder setKeyMapper(Class<T> type, KeyMapper<T> keyMapper) {
+      keyMappers.put(type, keyMapper);
+      return this;
+    }
+
+    public <T> Builder setVersionMapper(Class<T> type, VersionMapper<T> versionMapper) {
+      versionMappers.put(type, versionMapper);
+      return this;
+    }
+
+    public Builder setValueMapper(ValueMapper valueMapper) {
+      this.valueMapper = valueMapper;
       return this;
     }
 
@@ -67,27 +128,36 @@ public class CacheIO {
       return this;
     }
 
-    public Builder logLevel(LogLevel logLevel) {
-      this.logLevel = logLevel;
+    public Builder executor(Executor executor) {
+      this.executor = executor;
       return this;
     }
 
     public CacheIO build() {
-      checkArguments();
-      this.persistence = new PersistenceSQLBrite(PersistenceSQLBrite.generate(context, identifier));
-      this.logger = new AndroidLogger();
 
-      return new CacheIO(persistence, serializer, logger, logLevel);
-    }
+      // defaults
+      setKeyMapper(String.class, new StringKeyMapper());
+      setKeyMapper(Integer.class, new IntegerKeyMapper());
+      setKeyMapper(Long.class, new LongKeyMapper());
+      setKeyMapper(Double.class, new DoubleKeyMapper());
+      setKeyMapper(Float.class, new FloatKeyMapper());
+      setKeyMapper(Short.class, new ShortKeyMapper());
 
-    private void checkArguments() {
-      Preconditions.checkArgument(context, "context == null");
-      Preconditions.checkArgument(logLevel, "logLevel == null");
-      Preconditions.checkArgument(serializer, "serializer == null");
-
-      if (TextUtils.isEmpty(identifier)) {
-        throw new IllegalArgumentException("identifier == null OR database == empty");
+      // Value mappers
+      if (valueMapper == null) {
+        valueMapper = new DefaultValueMapper();
       }
+
+      // assertions
+      checkArgument(executor, "Executor cannot be null");
+      checkIsEmpty(identifier, "Identifier cannot be null or empty");
+      checkArgument(context, "Context cannot be null");
+
+      // create database
+      db = new SQLiteRxCacheOpenHelper(context, identifier);
+
+      return new CacheIO(new Builder(this));
     }
   }
+
 }

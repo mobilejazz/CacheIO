@@ -14,16 +14,13 @@
  *  limitations under the License.
  */
 
-package com.mobilejazz.cacheio;
+package com.mobilejazz.cacheio.caches;
 
-import org.junit.Ignore;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
+import com.mobilejazz.cacheio.mappers.VersionMapper;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
-@Ignore
-public class ApplicationTestCase {
+public class TestUserVersionMapper implements VersionMapper<TestUser> {
 
+  @Override public long getVersion(TestUser model) {
+    return model.getVersion();
+  }
 }
