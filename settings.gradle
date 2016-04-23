@@ -1,1 +1,1 @@
-include ':sample', ':cacheio-core', ':cacheio-serializers:cacheio-gson-serializer'
+include ':sample', ':cacheio-core', ':cacheio-serializers:cacheio-gson-serializer', ':cacheio-repository'
