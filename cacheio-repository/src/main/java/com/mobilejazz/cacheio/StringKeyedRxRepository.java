@@ -24,6 +24,7 @@ import java.util.*;
 import java.util.concurrent.*;
 
 import static com.mobilejazz.cacheio.helper.Preconditions.checkArgument;
+import static com.mobilejazz.cacheio.helper.Preconditions.checkIsEmpty;
 
 public class StringKeyedRxRepository<M extends HasId<String>, Q extends Query>
     implements RxRepository<String, M, Q> {
@@ -35,12 +36,10 @@ public class StringKeyedRxRepository<M extends HasId<String>, Q extends Query>
   }
 
   @Override public Single<List<M>> find(Q query) {
+    checkArgument(query, "Query == null");
+
     return proto.queryCache.get(query).flatMap(new Func1<StringList, Single<List<M>>>() {
       @Override public Single<List<M>> call(StringList stringIdList) {
-
-        if (stringIdList == null) {
-          return null;
-        }
 
         final List<String> ids = stringIdList.getIds();
 
@@ -62,10 +61,13 @@ public class StringKeyedRxRepository<M extends HasId<String>, Q extends Query>
   }
 
   @Override public Single<M> findById(String id) {
+    checkIsEmpty(id, "Id == null OR empty");
     return proto.cache.get(id);
   }
 
   @Override public Single<List<M>> put(Q query, List<M> models) {
+    checkArgument(query, "Query == null");
+    checkArgument(models, "Models == null");
 
     Map<String, M> values = new HashMap<>(models.size());
     final List<String> keys = new ArrayList<>(models.size());
@@ -78,10 +80,7 @@ public class StringKeyedRxRepository<M extends HasId<String>, Q extends Query>
 
     // Save the query with the ids
     StringList idList = new StringList(keys);
-    StringList idListPersisted = proto.queryCache.put(query, idList, Long.MAX_VALUE, TimeUnit.DAYS)
-        .toObservable()
-        .toBlocking()
-        .first();
+    proto.queryCache.put(query, idList, Long.MAX_VALUE, TimeUnit.DAYS);
 
     // Save the values with the ids
     Single<Map<String, M>> results = proto.cache.putAll(values, Long.MAX_VALUE, TimeUnit.DAYS);
@@ -99,21 +98,23 @@ public class StringKeyedRxRepository<M extends HasId<String>, Q extends Query>
   }
 
   @Override public Single<M> put(M model) {
+    checkArgument(model, "Model == null");
     return proto.cache.put(model.getId(), model, Long.MAX_VALUE, TimeUnit.DAYS);
   }
 
   @Override public Single<String> removeById(String id) {
+    checkIsEmpty(id, "Id == null OR empty");
     return proto.cache.remove(id);
   }
 
   @Override public Single<Collection<String>> removeByQuery(Q query) {
-    Single<StringList> ids = proto.queryCache.get(query);
-
-    return ids.flatMap(new Func1<StringList, Single<Collection<String>>>() {
-      @Override public Single<Collection<String>> call(StringList stringList) {
-        return proto.cache.removeAll(stringList.getIds());
-      }
-    });
+    checkArgument(query, "Query == null");
+    return proto.queryCache.get(query)
+        .flatMap(new Func1<StringList, Single<? extends Collection<String>>>() {
+          @Override public Single<? extends Collection<String>> call(StringList stringList) {
+            return proto.cache.removeAll(stringList.getIds());
+          }
+        });
   }
 
   public static final class Builder<M extends HasId<String>, Q extends Query> {
