@@ -40,8 +40,8 @@ public class StringKeyedRxRepository<M extends HasId<String>, Q extends Query>
 
     return proto.queryCache.get(query).flatMap(new Func1<StringList, Single<List<M>>>() {
       @Override public Single<List<M>> call(StringList stringIdList) {
-
-        final List<String> ids = stringIdList.getIds();
+        final List<String> ids =
+            stringIdList == null ? Collections.<String>emptyList() : stringIdList.getIds();
 
         Single<Map<String, M>> valueLookup = proto.cache.getAll(ids);
 
