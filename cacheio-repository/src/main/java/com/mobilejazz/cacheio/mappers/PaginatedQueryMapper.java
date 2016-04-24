@@ -21,13 +21,14 @@ import com.mobilejazz.cacheio.query.PaginatedQuery;
 public class PaginatedQueryMapper implements KeyMapper<PaginatedQuery> {
 
   @Override public String toString(PaginatedQuery model) {
-    return String.valueOf(model.getOffset()) + "." + model.getLimit();
+    return String.valueOf(model.getId() + "." + model.getOffset()) + "." + model.getLimit();
   }
 
   @Override public PaginatedQuery fromString(String str) {
-    String[] tokens = str.split(".");
-    String offset = tokens[0];
-    String limit = tokens[tokens.length - 1];
-    return new PaginatedQuery(Integer.parseInt(offset), Integer.parseInt(limit));
+    String[] tokens = str.split("\\.");
+    String id = tokens[0];
+    String offset = tokens[1];
+    String limit = tokens[2];
+    return new PaginatedQuery(id, Integer.parseInt(offset), Integer.parseInt(limit));
   }
 }
