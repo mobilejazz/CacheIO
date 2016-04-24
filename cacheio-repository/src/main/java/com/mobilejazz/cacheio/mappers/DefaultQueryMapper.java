@@ -18,13 +18,17 @@ package com.mobilejazz.cacheio.mappers;
 
 import com.mobilejazz.cacheio.query.DefaultQuery;
 
+import static com.mobilejazz.cacheio.helper.Preconditions.checkArgument;
+
 public class DefaultQueryMapper implements KeyMapper<DefaultQuery> {
 
   @Override public String toString(DefaultQuery model) {
+    checkArgument(model, "DefaultQuery == null");
     return model.getId();
   }
 
   @Override public DefaultQuery fromString(String str) {
+    checkArgument(str, "DefaultQuery string value == null");
     return new DefaultQuery(str);
   }
 }

@@ -18,17 +18,21 @@ package com.mobilejazz.cacheio.mappers;
 
 import com.mobilejazz.cacheio.query.PaginatedQuery;
 
+import static com.mobilejazz.cacheio.helper.Preconditions.checkArgument;
+
 public class PaginatedQueryMapper implements KeyMapper<PaginatedQuery> {
 
   private final static String DELIMITER = "_";
 
   @Override public String toString(PaginatedQuery model) {
+    checkArgument(model, "PaginatedQuery == null");
     return String.valueOf(model.getId() + DELIMITER + model.getOffset())
         + DELIMITER
         + model.getLimit();
   }
 
   @Override public PaginatedQuery fromString(String str) {
+    checkArgument(str, "PaginatedQuery string value == null");
     String[] tokens = str.split(DELIMITER);
     String id = tokens[0];
     String offset = tokens[1];
