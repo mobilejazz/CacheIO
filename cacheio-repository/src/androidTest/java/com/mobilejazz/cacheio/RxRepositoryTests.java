@@ -132,7 +132,7 @@ import static org.assertj.core.api.Assertions.assertThat;
     assertThat(testUser.getName()).isEqualTo(FAKE_TEST_USER_NAME);
   }
 
-  @Test public void shouldPutAListOfDummyObjects() throws Exception {
+  @Test public void shouldPutAListOfDummyObjectsWithPaginatedQuery() throws Exception {
     RxRepository<String, TestUser, PaginatedQuery> repository = givenARxRepository();
 
     TestUser testUserOne = givenDummyTestUser("one", "dummy_one");
@@ -161,6 +161,18 @@ import static org.assertj.core.api.Assertions.assertThat;
     assertThat(testUsersExpected.get(1).getName()).isEqualTo(testUserTwo.getName());
   }
 
+  @Test public void shouldReturnEmptyListWhenThereIsNoDummyObjectsWithPaginatedQuery()
+      throws Exception {
+    RxRepository<String, TestUser, PaginatedQuery> repository = givenARxRepository();
+
+    List<TestUser> testUsers = repository.find(givenAFakePaginatedQuery("fake.id", 0, 5))
+        .toObservable()
+        .toBlocking()
+        .first();
+
+    assertThat(testUsers).isEmpty();
+  }
+
   @Test public void shouldRemoveADummyObject() throws Exception {
     RxRepository<String, TestUser, PaginatedQuery> repository = givenARxRepository();
 
@@ -173,7 +185,7 @@ import static org.assertj.core.api.Assertions.assertThat;
     assertThat(keyRemoved).isEqualTo(FAKE_TEST_USER_ID);
   }
 
-  @Test public void shouldRemoveAListOfDummyObjectsByAQuery() throws Exception {
+  @Test public void shouldRemoveAListOfDummyObjectsByAPaginatedQuery() throws Exception {
     RxRepository<String, TestUser, PaginatedQuery> repository = givenARxRepository();
 
     TestUser testUserOne = givenDummyTestUser("one", "dummy_one");
