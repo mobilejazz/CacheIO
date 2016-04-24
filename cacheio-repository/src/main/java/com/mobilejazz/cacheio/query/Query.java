@@ -18,4 +18,5 @@ package com.mobilejazz.cacheio.query;
 
 public interface Query {
 
+  String getId();
 }

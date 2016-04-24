@@ -18,10 +18,12 @@ package com.mobilejazz.cacheio.query;
 
 public class PaginatedQuery implements Query {
 
-  private int offset;
-  private int limit;
+  private final String id;
+  private final int offset;
+  private final int limit;
 
-  public PaginatedQuery(int offset, int limit) {
+  public PaginatedQuery(String id, int offset, int limit) {
+    this.id = id;
     this.offset = offset;
     this.limit = limit;
   }
@@ -32,5 +34,28 @@ public class PaginatedQuery implements Query {
 
   public int getLimit() {
     return limit;
+  }
+
+  @Override public String getId() {
+    return id;
+  }
+
+  @Override public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    PaginatedQuery that = (PaginatedQuery) o;
+
+    if (offset != that.offset) return false;
+    if (limit != that.limit) return false;
+    return id.equals(that.id);
+
+  }
+
+  @Override public int hashCode() {
+    int result = id.hashCode();
+    result = 31 * result + offset;
+    result = 31 * result + limit;
+    return result;
   }
 }
