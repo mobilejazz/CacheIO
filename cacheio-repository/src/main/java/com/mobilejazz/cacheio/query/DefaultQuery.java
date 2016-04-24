@@ -27,4 +27,18 @@ public class DefaultQuery implements Query {
   @Override public String getId() {
     return this.id;
   }
+
+  @Override public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    DefaultQuery query = (DefaultQuery) o;
+
+    return !(id != null ? !id.equals(query.id) : query.id != null);
+
+  }
+
+  @Override public int hashCode() {
+    return id != null ? id.hashCode() : 0;
+  }
 }
