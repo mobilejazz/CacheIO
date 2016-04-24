@@ -80,7 +80,10 @@ public class StringKeyedRxRepository<M extends HasId<String>, Q extends Query>
 
     // Save the query with the ids
     StringList idList = new StringList(keys);
-    proto.queryCache.put(query, idList, Long.MAX_VALUE, TimeUnit.DAYS);
+    proto.queryCache.put(query, idList, Long.MAX_VALUE, TimeUnit.DAYS)
+        .toObservable()
+        .toBlocking()
+        .first();
 
     // Save the values with the ids
     Single<Map<String, M>> results = proto.cache.putAll(values, Long.MAX_VALUE, TimeUnit.DAYS);
