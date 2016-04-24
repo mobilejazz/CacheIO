@@ -20,12 +20,16 @@ import com.mobilejazz.cacheio.query.PaginatedQuery;
 
 public class PaginatedQueryMapper implements KeyMapper<PaginatedQuery> {
 
+  private final static String DELIMITER = "_";
+
   @Override public String toString(PaginatedQuery model) {
-    return String.valueOf(model.getId() + "." + model.getOffset()) + "." + model.getLimit();
+    return String.valueOf(model.getId() + DELIMITER + model.getOffset())
+        + DELIMITER
+        + model.getLimit();
   }
 
   @Override public PaginatedQuery fromString(String str) {
-    String[] tokens = str.split("\\.");
+    String[] tokens = str.split(DELIMITER);
     String id = tokens[0];
     String offset = tokens[1];
     String limit = tokens[2];

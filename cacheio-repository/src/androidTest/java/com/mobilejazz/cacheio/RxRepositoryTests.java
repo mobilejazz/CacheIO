@@ -157,7 +157,7 @@ import static org.assertj.core.api.Assertions.assertThat;
     testUsersToPut.add(testUserOne);
     testUsersToPut.add(testUserTwo);
 
-    PaginatedQuery paginatedQuery = new PaginatedQuery("test_user_paginated", 0, 10);
+    PaginatedQuery paginatedQuery = new PaginatedQuery("test.user.paginated", 0, 10);
     List<TestUser> testUsersPut =
         repository.put(paginatedQuery, testUsersToPut).toObservable().toBlocking().first();
 
@@ -251,7 +251,7 @@ import static org.assertj.core.api.Assertions.assertThat;
     testUsersToPut.add(testUserOne);
     testUsersToPut.add(testUserTwo);
 
-    PaginatedQuery paginatedQuery = new PaginatedQuery("test_user_paginated", 0, 10);
+    PaginatedQuery paginatedQuery = new PaginatedQuery("test.user.paginated", 0, 10);
     List<TestUser> testUsersPut =
         repository.put(paginatedQuery, testUsersToPut).toObservable().toBlocking().first();
 
