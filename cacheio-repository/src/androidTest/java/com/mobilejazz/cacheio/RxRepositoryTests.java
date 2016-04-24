@@ -22,7 +22,6 @@ import com.mobilejazz.cacheio.mappers.PaginatedQueryMapper;
 import com.mobilejazz.cacheio.model.TestUser;
 import com.mobilejazz.cacheio.query.PaginatedQuery;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import rx.Single;
@@ -46,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         .build();
   }
 
-  @Ignore @Test public void shouldPutADummyObject() throws Exception {
+  @Test public void shouldPutADummyObject() throws Exception {
     RxRepository<String, TestUser, PaginatedQuery> repository = givenARxRepository();
 
     TestUser testUserPut = repository.put(givenDummyTestUser()).toObservable().toBlocking().first();
@@ -70,7 +69,7 @@ import static org.assertj.core.api.Assertions.assertThat;
     testUsersToPut.add(testUserOne);
     testUsersToPut.add(testUserTwo);
 
-    PaginatedQuery paginatedQuery = new PaginatedQuery(0, 10);
+    PaginatedQuery paginatedQuery = new PaginatedQuery("test_user_paginated", 0, 10);
     List<TestUser> testUsersPut =
         repository.put(paginatedQuery, testUsersToPut).toObservable().toBlocking().first();
 
@@ -87,6 +86,38 @@ import static org.assertj.core.api.Assertions.assertThat;
     assertThat(testUsersExpected.get(1)).isNotNull();
     assertThat(testUsersExpected.get(1).getId()).isEqualTo(testUserTwo.getId());
     assertThat(testUsersExpected.get(1).getName()).isEqualTo(testUserTwo.getName());
+  }
+
+  @Test public void shouldRemoveADummyObject() throws Exception {
+    RxRepository<String, TestUser, PaginatedQuery> repository = givenARxRepository();
+
+    TestUser persisted = repository.put(givenDummyTestUser()).toObservable().toBlocking().first();
+
+    String keyRemoved =
+        repository.removeById(FAKE_TEST_USER_ID).toObservable().toBlocking().first();
+
+    assertThat(keyRemoved).isNotNull();
+    assertThat(keyRemoved).isEqualTo(FAKE_TEST_USER_ID);
+  }
+
+  @Test public void shouldRemoveAListOfDummyObjectsByAQuery() throws Exception {
+    RxRepository<String, TestUser, PaginatedQuery> repository = givenARxRepository();
+
+    TestUser testUserOne = givenDummyTestUser("one", "dummy_one");
+    TestUser testUserTwo = givenDummyTestUser("two", "dummy_two");
+
+    List<TestUser> testUsersToPut = new ArrayList<>(2);
+    testUsersToPut.add(testUserOne);
+    testUsersToPut.add(testUserTwo);
+
+    PaginatedQuery paginatedQuery = new PaginatedQuery("test_user_paginated", 0, 10);
+    List<TestUser> testUsersPut =
+        repository.put(paginatedQuery, testUsersToPut).toObservable().toBlocking().first();
+
+    Collection<String> keysRemoved =
+        repository.removeByQuery(paginatedQuery).toObservable().toBlocking().first();
+
+    assertThat(keysRemoved).isNotNull();
   }
 
   private List<TestUser> givenListOfDummyTestUser() {
