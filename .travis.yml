@@ -7,3 +7,4 @@ android:
     - extra
 script:
   - ./gradlew test
+  - ./gradlew cAT
