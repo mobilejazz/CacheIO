@@ -30,6 +30,9 @@ android {
         testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
     }
     buildTypes {
+        debug {
+            testCoverageEnabled = true
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -39,9 +42,11 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile 'junit:junit:4.12'
-
     compile project(':cacheio-core')
+
+    testCompile "junit:junit:${v.junitVersion}"
+    testCompile "org.assertj:assertj-core:${v.assertJVersion}"
+    testCompile "org.mockito:mockito-core:${v.mockitoVersion}"
 
     androidTestCompile 'com.android.support.test:runner:0.4'
     androidTestCompile "org.assertj:assertj-core:${v.assertJVersion}"
