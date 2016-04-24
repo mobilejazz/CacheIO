@@ -132,7 +132,7 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
     for (int i = 0; i < count; i++) {
       builder.append(",").append("?");
     }
-    return builder.toString().substring(1);
+    return builder.length() == 0 ? "" : builder.toString().substring(1);
   }
 
   private String[] keysAsString(Collection<K> keys) {
