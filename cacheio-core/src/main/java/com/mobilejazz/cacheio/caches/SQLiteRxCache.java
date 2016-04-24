@@ -132,7 +132,7 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
     for (int i = 0; i < count; i++) {
       builder.append(",").append("?");
     }
-    return builder.toString().substring(1);
+    return builder.length() == 0 ? "" : builder.toString().substring(1);
   }
 
   private String[] keysAsString(Collection<K> keys) {
@@ -300,7 +300,7 @@ public class SQLiteRxCache<K, V> implements RxCache<K, V> {
             bytesOut.close();
 
             final ContentValues values = new ContentValues(2);
-            values.put(COLUMN_KEY, key.toString());
+            values.put(COLUMN_KEY, keyMapper.toString(key));
             values.put(COLUMN_VALUE, bytesOut.toByteArray());
             values.put(COLUMN_VERSION, version);
             values.put(COLUMN_CREATED, createdAt);
