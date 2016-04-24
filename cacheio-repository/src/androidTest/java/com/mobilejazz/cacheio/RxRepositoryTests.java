@@ -16,6 +16,7 @@
 
 package com.mobilejazz.cacheio;
 
+import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import com.mobilejazz.cacheio.mappers.PaginatedQueryMapper;
@@ -43,6 +44,78 @@ import static org.assertj.core.api.Assertions.assertThat;
         .executor(Executors.newSingleThreadExecutor())
         .setKeyMapper(PaginatedQuery.class, new PaginatedQueryMapper())
         .build();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowAExceptionWhenDummyObjectIsNull() throws Exception {
+    RxRepository<String, TestUser, PaginatedQuery> repository = givenARxRepository();
+
+    repository.put(null);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowAExceptionWhenQueryAndListAreNull() throws Exception {
+    RxRepository<String, TestUser, PaginatedQuery> repository = givenARxRepository();
+
+    repository.put(null, null);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowAExceptionWhenPutAndQueryIsNull() throws Exception {
+    RxRepository<String, TestUser, PaginatedQuery> repository = givenARxRepository();
+
+    repository.put(null, Collections.<TestUser>emptyList());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowAExceptionWhenPutAndListIsNull() throws Exception {
+    RxRepository<String, TestUser, PaginatedQuery> repository = givenARxRepository();
+
+    PaginatedQuery paginatedQuery = givenAFakePaginatedQuery("test", 0, 5);
+
+    repository.put(paginatedQuery, null);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowAExceptionWhenFindAndQueryIsNull() throws Exception {
+    RxRepository<String, TestUser, PaginatedQuery> repository = givenARxRepository();
+
+    repository.find(null);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowAExceptionWhenFindByIdAndIdIsNull() throws Exception {
+    RxRepository<String, TestUser, PaginatedQuery> repository = givenARxRepository();
+
+    repository.findById(null);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowAExceptionWhenFindByIdAndIdIsEmpty() throws Exception {
+    RxRepository<String, TestUser, PaginatedQuery> repository = givenARxRepository();
+
+    repository.findById("");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowAExceptionWhenRemoveByIdAndIdIsEmpty() throws Exception {
+    RxRepository<String, TestUser, PaginatedQuery> repository = givenARxRepository();
+
+    repository.removeById("");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowAExceptionWhenRemoveByIdAndIdIsNull() throws Exception {
+    RxRepository<String, TestUser, PaginatedQuery> repository = givenARxRepository();
+
+    repository.removeById(null);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowAExceptionWhenRemoveByQueryAndQueryIsNull() throws Exception {
+    RxRepository<String, TestUser, PaginatedQuery> repository = givenARxRepository();
+
+    repository.removeByQuery(null);
   }
 
   @Test public void shouldPutADummyObject() throws Exception {
@@ -150,4 +223,9 @@ import static org.assertj.core.api.Assertions.assertThat;
         .setQueryCache(queryCache)
         .build();
   }
+
+  @NonNull private PaginatedQuery givenAFakePaginatedQuery(String test, int offset, int limit) {
+    return new PaginatedQuery(test, offset, limit);
+  }
+
 }
