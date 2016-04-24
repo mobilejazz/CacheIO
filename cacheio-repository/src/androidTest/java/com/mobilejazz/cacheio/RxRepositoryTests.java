@@ -50,6 +50,32 @@ import static org.assertj.core.api.Assertions.assertThat;
   }
 
   @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowAExceptionWhenCacheAndQueryCacheIsNull() throws Exception {
+    new StringKeyedRxRepository.Builder<TestUser, DefaultQuery>().setCache(null)
+        .setQueryCache(null)
+        .build();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowAExceptionWhenCacheIsNull() throws Exception {
+    RxCache<DefaultQuery, StringList> queryCache =
+        cacheIO.newRxCache(DefaultQuery.class, StringList.class);
+
+    new StringKeyedRxRepository.Builder<TestUser, DefaultQuery>().setCache(null)
+        .setQueryCache(queryCache)
+        .build();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void shouldThrowAExceptionWhenQueryCacheIsNull() throws Exception {
+    RxCache<String, TestUser> cache = cacheIO.newRxCache(String.class, TestUser.class);
+
+    new StringKeyedRxRepository.Builder<TestUser, DefaultQuery>().setCache(cache)
+        .setQueryCache(null)
+        .build();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
   public void shouldThrowAExceptionWhenDummyObjectIsNull() throws Exception {
     RxRepository<String, TestUser, PaginatedQuery> repository =
         givenARxWithPaginatedQueryRepository();
