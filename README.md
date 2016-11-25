@@ -1,3 +1,5 @@
+![CacheIO](https://raw.githubusercontent.com/mobilejazz/metadata/master/images/banners/mobile-jazz-cacheio-android.jpg)
+
 CacheIO
 =============
 
@@ -69,7 +71,7 @@ Libraries used in this project
 License
 -------
 
-    Copyright 2015 MobileJazz
+    Copyright 2015 Mobile Jazz
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
