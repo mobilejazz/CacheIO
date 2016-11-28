@@ -1,8 +1,5 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'org.moallemi.advanced-build-version'
-
-group = 'com.github.mobilejazz'
+apply from: '../../gradle-mvn-push.gradle'
 
 def v = rootProject.ext
 
@@ -13,8 +10,8 @@ android {
   defaultConfig {
     minSdkVersion v.minSdkVersion
     targetSdkVersion v.targetSdkVersion
-    versionCode advancedVersioning.versionCode
-    versionName advancedVersioning.versionName
+    versionCode 1001
+    versionName "1.0"
   }
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_7

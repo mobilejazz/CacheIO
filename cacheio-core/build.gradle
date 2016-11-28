@@ -1,7 +1,5 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
-
-group = 'com.github.mobilejazz'
+apply from: '../gradle-mvn-push.gradle'
 
 def v = rootProject.ext
 

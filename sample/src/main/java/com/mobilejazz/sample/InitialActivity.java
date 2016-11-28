@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import com.mobilejazz.cacheio.CacheIO;
+import com.mobilejazz.cacheio.FutureCache;
+import com.mobilejazz.cacheio.RxCache;
 import com.mobilejazz.cacheio.SyncCache;
 import com.mobilejazz.cacheio.serializers.gson.GsonValueMapper;
 import com.mobilejazz.sample.gson.GsonFactory;
@@ -28,6 +30,11 @@ public class InitialActivity extends AppCompatActivity {
         .build();
 
     SyncCache<String, User> syncCache = cacheIO.newSyncCache(String.class, User.class);
+    FutureCache<String, User> futureCache =
+        cacheIO.newFutureCache(String.class, User.class);
+    RxCache<String, User> rxCache = cacheIO.newRxCache(String.class, User.class);
+
+
 
     User userOne = new User();
     userOne.setId(1);
