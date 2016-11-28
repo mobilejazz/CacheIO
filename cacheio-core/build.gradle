@@ -54,6 +54,4 @@ dependencies {
 
     androidTestCompile 'com.android.support.test:runner:0.4'
     androidTestCompile "org.assertj:assertj-core:${v.assertJVersion}"
-
-    compile 'com.google.code.gson:gson:2.4'
 }
