@@ -83,11 +83,20 @@ afterEvaluate { project ->
                         }
                     }
                 }
+
+                pom.whenConfigured { pom ->
+                    pom.dependencies.forEach { dep ->
+                        if (dep.getVersion() == "unspecified") {
+                            dep.setGroupId(GROUP)
+                            dep.setVersion(VERSION_NAME)
+                        }
+                    }
+                }
             }
         }
     }
 
-    task installArchives (type: Upload) {
+    task installArchives(type: Upload) {
         description "Installs the artifacts to the local Maven repository."
         configuration = configurations['archives']
         repositories {
