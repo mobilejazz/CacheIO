@@ -14,16 +14,31 @@
  *  limitations under the License.
  */
 
-package com.mobilejazz.cacheio;
+package com.mobilejazz.cacheio.query;
 
-import org.junit.Ignore;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
+public class DefaultQuery implements Query {
 
-@RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
-@Ignore
-public class ApplicationTestCase {
+  private final String id;
 
+  public DefaultQuery(String id) {
+    this.id = id;
+  }
+
+  @Override public String getId() {
+    return this.id;
+  }
+
+  @Override public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    DefaultQuery query = (DefaultQuery) o;
+
+    return !(id != null ? !id.equals(query.id) : query.id != null);
+
+  }
+
+  @Override public int hashCode() {
+    return id != null ? id.hashCode() : 0;
+  }
 }

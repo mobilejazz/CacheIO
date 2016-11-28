@@ -14,16 +14,21 @@
  *  limitations under the License.
  */
 
-package com.mobilejazz.cacheio;
+package com.mobilejazz.cacheio.mappers;
 
-import org.junit.Ignore;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
+import com.mobilejazz.cacheio.query.DefaultQuery;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
-@Ignore
-public class ApplicationTestCase {
+import static com.mobilejazz.cacheio.helper.Preconditions.checkArgument;
 
+public class DefaultQueryMapper implements KeyMapper<DefaultQuery> {
+
+  @Override public String toString(DefaultQuery model) {
+    checkArgument(model, "DefaultQuery == null");
+    return model.getId();
+  }
+
+  @Override public DefaultQuery fromString(String str) {
+    checkArgument(str, "DefaultQuery string value == null");
+    return new DefaultQuery(str);
+  }
 }

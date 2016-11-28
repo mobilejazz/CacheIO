@@ -16,14 +16,23 @@
 
 package com.mobilejazz.cacheio;
 
-import org.junit.Ignore;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
+import com.mobilejazz.cacheio.query.Query;
+import rx.Single;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
-@Ignore
-public class ApplicationTestCase {
+import java.util.*;
+
+public interface RxRepository<Id, M extends HasId<Id>, Q extends Query> {
+
+  Single<List<M>> find(Q query);
+
+  Single<M> findById(Id id);
+
+  Single<List<M>> put(Q query, List<M> models);
+
+  Single<M> put(M model);
+
+  Single<Id> removeById(Id id);
+
+  Single<Collection<Id>> removeByQuery(Q query);
 
 }

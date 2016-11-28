@@ -16,14 +16,19 @@
 
 package com.mobilejazz.cacheio;
 
-import org.junit.Ignore;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
+import java.io.*;
+import java.util.*;
 
-@RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 21, manifest = Config.NONE)
-@Ignore
-public class ApplicationTestCase {
+public class StringList implements Serializable {
+
+  private final List<String> ids;
+
+  public StringList(List<String> ids) {
+    this.ids = ids;
+  }
+
+  public List<String> getIds() {
+    return ids;
+  }
 
 }
