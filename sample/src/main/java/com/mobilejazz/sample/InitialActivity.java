@@ -30,11 +30,8 @@ public class InitialActivity extends AppCompatActivity {
         .build();
 
     SyncCache<String, User> syncCache = cacheIO.newSyncCache(String.class, User.class);
-    FutureCache<String, User> futureCache =
-        cacheIO.newFutureCache(String.class, User.class);
+    FutureCache<String, User> futureCache = cacheIO.newFutureCache(String.class, User.class);
     RxCache<String, User> rxCache = cacheIO.newRxCache(String.class, User.class);
-
-
 
     User userOne = new User();
     userOne.setId(1);
@@ -46,64 +43,5 @@ public class InitialActivity extends AppCompatActivity {
 
     Log.d(TAG, user.toString());
 
-
-
-
-
-    /*
-    CacheIO cacheIO = CacheIO.with(getApplicationContext())
-        .identifier("cacheio-test")
-        .logLevel(LogLevel.FULL)
-        .serializer(new GsonSerializer(GsonFactory.create()))
-        .build();
-
-    Cache cache = cacheIO.cacheDataSource();
-
-    User userOne = new User();
-    userOne.setId(1);
-    userOne.setName("Jose Luis Franconetti");
-
-    User userTwo = new User();
-    userTwo.setId(2);
-    userTwo.setName("Test user");
-
-    CacheEntry cacheEntryUserOne = CacheEntry.create(USER_KEY_ONE, User.class, userOne, 12);
-    cache.persist(cacheEntryUserOne);
-    cache.persist(cacheEntryUserOne);
-    cache.persist(cacheEntryUserOne);
-
-    List<User> users = new ArrayList<>();
-    users.add(userOne);
-    users.add(userTwo);
-
-    CacheEntry cacheEntryUserList = CacheEntry.create(USER_KEY_LIST, User.class, users, 12);
-    cache.persist(cacheEntryUserList);
-    cache.persist(cacheEntryUserList);
-    cache.persist(cacheEntryUserList);
-
-    CacheEntry resultQueryUserOne = cache.obtain(USER_KEY_ONE);
-
-    User resultUser = (User) resultQueryUserOne.getValue();
-    Log.d(TAG, "User One = " + resultUser.toString());
-
-    CacheEntry resultQueryUserList = cache.obtain(USER_KEY_LIST);
-
-
-    List<User> resultQueryListUsers = (List<User>) resultQueryUserList.getValue();
-    for (User user : resultQueryListUsers) {
-      Log.d(TAG, "List - " + user.toString());
-    }
-    */
-
-/*    User userThree = new User();
-    userThree.setId(3);
-    userThree.setName("Aldo Borrero");*/
-
-    //CacheEntry cacheEntryUserThree = CacheEntry.create("user.key.three", User.class, userThree);
-    //cache.persist(cacheEntryUserThree);
-    //cache.delete("user.key.three");
-
-    //CacheEntry emptyUserThreeEntry = cache.obtain("user.key.three");
-    //Log.d(TAG, "Cache is emptied for User three: " + String.valueOf(emptyUserThreeEntry == null));
   }
 }
